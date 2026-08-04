@@ -95,7 +95,7 @@ export const ContactForm: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-bold text-white">Physical Location</p>
-                    <p className="text-xs text-slate-300">Gatura Town, Gatanga Sub-County, P.O. Box Gatura, Murang'a County, Kenya</p>
+                    <p className="text-xs text-slate-300">Gatura Town, Gatanga Sub-County, P.O. Box 30-01013 Gatura, Murang'a County, Kenya</p>
                     <a 
                       href="https://maps.app.goo.gl/oq7iHDB4f6vS2P868" 
                       target="_blank" 
@@ -114,7 +114,7 @@ export const ContactForm: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-bold text-white">Phone Contacts</p>
-                    <p className="text-xs text-slate-300">+254 (0) 722 000 000 / +254 (0) 733 111 222</p>
+                    <p className="text-xs text-slate-300">+254 (0) 793328863</p>
                   </div>
                 </div>
 
@@ -124,7 +124,7 @@ export const ContactForm: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-bold text-white">Official Email</p>
-                    <p className="text-xs text-slate-300">info@stteresagaturagirls.sc.ke</p>
+                    <p className="text-xs text-slate-300">gaturagirls@gmail.com</p>
                   </div>
                 </div>
 
