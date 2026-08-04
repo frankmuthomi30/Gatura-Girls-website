@@ -1,0 +1,89 @@
+{
+  "collections": {
+    "news": {
+      "title": "string",
+      "date": "string",
+      "excerpt": "string",
+      "content": "string",
+      "category": "string",
+      "imageUrl": "string",
+      "attachmentUrl": "string",
+      "createdAt": "timestamp"
+    },
+    "jobs": {
+      "title": "string",
+      "department": "string",
+      "employmentType": "string",
+      "deadline": "string",
+      "description": "string",
+      "requirements": "array",
+      "attachmentUrl": "string",
+      "createdAt": "timestamp"
+    },
+    "banners": {
+      "title": "string",
+      "subtitle": "string",
+      "imageUrl": "string",
+      "ctaText": "string",
+      "ctaLink": "string",
+      "active": "boolean",
+      "order": "number",
+      "createdAt": "timestamp"
+    },
+    "gallery": {
+      "title": "string",
+      "category": "string",
+      "imageUrl": "string",
+      "caption": "string",
+      "createdAt": "timestamp"
+    },
+    "leadership": {
+      "name": "string",
+      "role": "string",
+      "bio": "string",
+      "quote": "string",
+      "imageUrl": "string",
+      "order": "number"
+    },
+    "faqs": {
+      "question": "string",
+      "answer": "string",
+      "category": "string",
+      "order": "number"
+    },
+    "messages": {
+      "name": "string",
+      "email": "string",
+      "phone": "string",
+      "subject": "string",
+      "message": "string",
+      "status": "string",
+      "createdAt": "timestamp"
+    },
+    "links": {
+      "title": "string",
+      "url": "string",
+      "category": "string",
+      "order": "number"
+    },
+    "heroSlides": {
+      "title": "string",
+      "subtitle": "string",
+      "tag": "string",
+      "image": "string",
+      "order": "number",
+      "createdAt": "timestamp"
+    },
+    "featured_videos": {
+      "title": "string",
+      "youtubeUrl": "string",
+      "videoId": "string",
+      "description": "string",
+      "featured": "boolean",
+      "order": "number",
+      "thumbnailUrl": "string",
+      "createdAt": "timestamp",
+      "updatedAt": "timestamp"
+    }
+  }
+}

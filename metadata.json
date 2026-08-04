@@ -1,0 +1,6 @@
+{
+  "name": "St. Teresa Gatura Girls Senior School",
+  "description": "Modern website for St. Teresa Gatura Girls Senior School offering 8-4-4 and CBC systems with interactive features, live location & weather, gallery, news, and admin management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
