@@ -84,7 +84,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenAdmissions })
               <p className="flex items-start space-x-2">
                 <MapPin className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                 <span>
-                  Gatura Market, Gatanga Sub-County, P.O. Box Gatura, Murang'a County, Kenya{' '}
+                  Gatura, Gatanga Sub-County, P.O. Box 30-01013 Gatura, Murang'a County, Kenya{' '}
                   <a 
                     href="https://maps.app.goo.gl/oq7iHDB4f6vS2P868" 
                     target="_blank" 
@@ -97,11 +97,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenAdmissions })
               </p>
               <p className="flex items-center space-x-2">
                 <Phone className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>+254 722 000 000 / +254 733 111 222</span>
+                <span>+254 793328863</span>
               </p>
               <p className="flex items-center space-x-2">
                 <Mail className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>info@stteresagaturagirls.sc.ke</span>
+                <span>gaturagirls@gmail.com</span>
               </p>
             </div>
           </div>
