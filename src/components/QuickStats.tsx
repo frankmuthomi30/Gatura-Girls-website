@@ -5,13 +5,13 @@ export const QuickStats: React.FC = () => {
   const stats = [
     {
       label: 'Enrolled Students',
-      value: '1,200+',
-      description: 'Bright young women across 8-4-4 & CBC pathways',
+      value: '850+',
+      description: 'Bright young girls across 8-4-4 & CBC pathways',
       icon: Users,
       color: 'from-emerald-500 to-teal-500'
     },
     {
-      label: 'University Transition',
+      label: 'University/College Transition',
       value: '100%',
       description: 'Graduates joining top public & global universities',
       icon: Award,
@@ -27,7 +27,7 @@ export const QuickStats: React.FC = () => {
     {
       label: 'Co-Curricular Clubs',
       value: '25+',
-      description: 'Robotics, Drama, Music, Sports & Journalism',
+      description: 'Drama, Music, Sports & Journalism',
       icon: Sparkles,
       color: 'from-cyan-500 to-blue-500'
     }

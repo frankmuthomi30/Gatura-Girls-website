@@ -163,7 +163,7 @@ export const Hero: React.FC<HeroProps> = ({ onExplorePrograms, onOpenAdmissions,
             <div className="flex flex-wrap gap-3 pt-2">
               <div className="flex items-center space-x-2 text-sm text-slate-200 bg-white/5 border border-white/10 px-3.5 py-1.5 rounded-lg backdrop-blur-sm">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>STEM & ICT Pathways</span>
+                <span>STEM & SOCIAL SCIENCES Pathways</span>
               </div>
               <div className="flex items-center space-x-2 text-sm text-slate-200 bg-white/5 border border-white/10 px-3.5 py-1.5 rounded-lg backdrop-blur-sm">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -284,7 +284,7 @@ export const Hero: React.FC<HeroProps> = ({ onExplorePrograms, onOpenAdmissions,
                 </div>
                 <div>
                   <p className="text-xs text-slate-400 font-medium">Exam Performance</p>
-                  <p className="text-sm font-bold text-white">Top Girls Senior School</p>
+                  <p className="text-sm font-bold text-white"> Girls Senior School</p>
                 </div>
               </div>
 
