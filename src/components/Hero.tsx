@@ -151,7 +151,7 @@ export const Hero: React.FC<HeroProps> = ({ onExplorePrograms, onOpenAdmissions,
 
             {/* Main Headline */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.15]">
-              Empowering Young Women For <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-200">Global Leadership</span>
+              Empowering Young Girls For <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-200">Global Leadership</span>
             </h1>
 
             {/* Subtitle */}
