@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Youtube, Play, Film, ExternalLink, Radio } from 'lucide-react';
+import { Youtube, Play, ExternalLink, ArrowUpRight } from 'lucide-react';
 
 const YOUTUBE_VIDEOS = [
   {
     id: 'anthem-2025',
-    youtubeId: 'L_LUpnjgPso', // Sample educational/choir embed
+    youtubeId: 'L_LUpnjgPso',
     title: 'St. Teresa Gatura Girls Senior School Anthem & Morning Devotion',
     duration: '4:15',
     category: 'School Anthem',
@@ -40,84 +40,87 @@ const YOUTUBE_VIDEOS = [
   }
 ];
 
+const CHANNEL_HANDLE = '@STTERESAGATURAGIRLSHIGHSCHOOL';
+const CHANNEL_ID = 'UC-kMsQwdGF2pawrfT6xixTg';
+
 export const YouTubeFeed: React.FC = () => {
   const [activeVideo, setActiveVideo] = useState(YOUTUBE_VIDEOS[0]);
+  const activeIndex = YOUTUBE_VIDEOS.findIndex((v) => v.id === activeVideo.id);
 
   return (
-    <section className="py-20 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white relative overflow-hidden transition-colors">
-      
-      {/* Background Accent */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-200 via-slate-100 to-slate-200 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 opacity-90" />
-      <div className="absolute top-1/2 left-0 w-80 h-80 bg-red-600/5 dark:bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
+    <section className="relative py-24 bg-[#FAF7F2] dark:bg-[#0A0D14] text-[#161311] dark:text-[#F3F0E9] transition-colors overflow-hidden">
+      {/* faint tuning-dial texture */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.4] dark:opacity-[0.15]"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle at 1px 1px, rgba(120,110,95,0.18) 1px, transparent 0)',
+          backgroundSize: '28px 28px'
+        }}
+      />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
-          <div className="space-y-3">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-bold uppercase tracking-wider">
-              <Youtube className="w-4 h-4 text-red-600 dark:text-red-500" />
-              <span>Official YouTube Channel • @STTERESAGATURAGIRLSHIGHSCHOOL</span>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Masthead */}
+        <div className="flex flex-col gap-6 border-b border-[#D8D0C2] dark:border-[#232839] pb-8 mb-10">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-[#8A6D3B] dark:text-[#D4A24C]">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-60" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600" />
+              </span>
+              On the Channel
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              ST TERESA GATURA GIRLS HIGH SCHOOL Channel
+            <a
+              href={`https://www.youtube.com/${CHANNEL_HANDLE}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#161311] dark:text-[#F3F0E9] border-b border-current pb-0.5"
+            >
+              Subscribe on YouTube
+              <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </a>
+          </div>
+
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <h2 className="font-black uppercase leading-[0.92] tracking-tight text-[13vw] sm:text-6xl lg:text-7xl">
+              Campus
+              <br />
+              <span className="text-red-600 dark:text-red-500">Broadcast</span>
             </h2>
-            <p className="text-slate-600 dark:text-slate-300 text-base max-w-2xl font-light">
-              Watch recent assemblies, music festivals, Grade 10 CBC STEM exhibitions, and campus life videos straight from our official YouTube media channel.
+            <p className="max-w-sm text-sm sm:text-[15px] text-[#5B5346] dark:text-[#A8A196] leading-relaxed lg:pb-2">
+              Assemblies, music festivals, CBC science exhibitions and campus
+              life — recorded and streamed from St. Teresa Gatura Girls'
+              official channel.
             </p>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <a
-              href="https://www.youtube.com/@STTERESAGATURAGIRLSHIGHSCHOOL"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center space-x-2 px-5 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm shadow-sm shadow-red-600/30 transition-all"
-            >
-              <Radio className="w-4 h-4 animate-pulse" />
-              <span>Subscribe @STTERESAGATURAGIRLSHIGHSCHOOL</span>
-              <ExternalLink className="w-4 h-4" />
-            </a>
-          </div>
         </div>
 
-        {/* Channel Details Banner Box */}
-        <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center font-black text-white text-lg shrink-0 shadow-md">
+        {/* Channel strip */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-10 text-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#161311] dark:bg-[#F3F0E9] text-[#FAF7F2] dark:text-[#0A0D14] flex items-center justify-center font-black text-sm shrink-0">
               ST
             </div>
-            <div>
-              <p className="font-extrabold text-slate-900 dark:text-white text-sm">ST TERESA GATURA GIRLS HIGH SCHOOL</p>
-              <p className="text-red-600 dark:text-red-400 font-mono text-[11px]">Handle: @STTERESAGATURAGIRLSHIGHSCHOOL</p>
-              <p className="text-slate-600 dark:text-slate-500 dark:text-slate-400 text-[11px] truncate max-w-md">Channel ID: UC-kMsQwdGF2pawrfT6xixTg</p>
+            <div className="leading-tight">
+              <p className="font-bold">St. Teresa Gatura Girls High School</p>
+              <p className="font-mono text-[#8A6D3B] dark:text-[#D4A24C] text-[11px]">{CHANNEL_HANDLE}</p>
             </div>
           </div>
-
-          <div className="flex items-center space-x-3 text-slate-600 dark:text-slate-300 text-[11px]">
-            <span className="px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-              Banner: 2048 x 1152px
-            </span>
-            <span className="px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-              Profile Pic: 98 x 98px
-            </span>
-            <a
-              href="https://www.youtube.com/channel/UC-kMsQwdGF2pawrfT6xixTg"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-1 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white dark:hover:text-slate-950 font-bold transition-colors"
-            >
-              Open Channel URL ↗
-            </a>
-          </div>
+          <a
+            href={`https://www.youtube.com/channel/${CHANNEL_ID}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-[11px] text-[#8A6D3B] dark:text-[#A8A196] hover:text-red-600 dark:hover:text-red-500 transition-colors truncate"
+          >
+            {CHANNEL_ID} ↗
+          </a>
         </div>
 
-        {/* Video Player + Playlist Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* Main Embedded Player */}
-          <div className="lg:col-span-8 space-y-4">
-            <div className="relative rounded-2xl overflow-hidden bg-slate-200 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 shadow-md aspect-video">
+        {/* Player + Channel Guide */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          {/* Player */}
+          <div className="lg:col-span-7 space-y-5">
+            <div className="relative rounded-sm overflow-hidden bg-black border border-[#D8D0C2] dark:border-[#232839] shadow-[6px_6px_0_0_#161311] dark:shadow-[6px_6px_0_0_#D4A24C] aspect-video">
               <iframe
                 className="w-full h-full"
                 src={`https://www.youtube-nocookie.com/embed/${activeVideo.youtubeId}?autoplay=0&rel=0`}
@@ -125,75 +128,90 @@ export const YouTubeFeed: React.FC = () => {
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
+              <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-sm bg-red-600 text-white text-[10px] font-bold uppercase tracking-widest">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                Now Playing
+              </div>
             </div>
 
-            <div className="p-6 rounded-2xl bg-white/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 backdrop-blur-md space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="px-3 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold uppercase">
+            <div className="flex items-start justify-between gap-4 border-t border-[#D8D0C2] dark:border-[#232839] pt-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-600 dark:text-red-500 mb-1.5">
                   {activeVideo.category}
-                </span>
-                <span className="text-slate-600 dark:text-slate-500 dark:text-slate-400 font-mono">Duration: {activeVideo.duration}</span>
+                </p>
+                <h3 className="text-xl sm:text-2xl font-black leading-tight mb-2">
+                  {activeVideo.title}
+                </h3>
+                <p className="text-sm text-[#5B5346] dark:text-[#A8A196] leading-relaxed max-w-xl">
+                  {activeVideo.description}
+                </p>
               </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-snug">
-                {activeVideo.title}
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-300 font-light leading-relaxed">
-                {activeVideo.description}
-              </p>
+              <span className="shrink-0 font-mono text-xs text-[#8A6D3B] dark:text-[#D4A24C] tabular-nums">
+                {String(activeIndex + 1).padStart(2, '0')} / {String(YOUTUBE_VIDEOS.length).padStart(2, '0')}
+              </span>
             </div>
           </div>
 
-          {/* Video Playlist Cards */}
-          <div className="lg:col-span-4 space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-500 dark:text-slate-400 px-1 flex items-center space-x-2">
-              <Film className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <span>Up Next in Playlist ({YOUTUBE_VIDEOS.length})</span>
-            </h4>
-
-            <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
-              {YOUTUBE_VIDEOS.map((video) => {
+          {/* Channel guide */}
+          <div className="lg:col-span-5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#8A6D3B] dark:text-[#A8A196] mb-3 pl-1">
+              Channel Guide
+            </p>
+            <div className="border-t border-[#D8D0C2] dark:border-[#232839]">
+              {YOUTUBE_VIDEOS.map((video, i) => {
                 const isSelected = activeVideo.id === video.id;
                 return (
                   <button
                     key={video.id}
                     onClick={() => setActiveVideo(video)}
-                    className={`w-full flex items-center space-x-3 p-3 rounded-2xl border text-left transition-all ${
-                      isSelected
-                        ? 'bg-emerald-500/15 border-emerald-500 text-slate-900 dark:text-white shadow-sm shadow-emerald-500/20 dark:shadow-emerald-950/50'
-                        : 'bg-white/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
+                    className={`group w-full flex items-center gap-4 py-4 border-b border-[#D8D0C2] dark:border-[#232839] text-left transition-colors ${
+                      isSelected ? '' : 'hover:bg-[#F0EBE0] dark:hover:bg-[#131826]'
                     }`}
                   >
-                    <div className="relative w-24 h-16 rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-900">
-                      <img loading="lazy" 
-                        src={video.thumbnail} 
-                        alt={video.title} 
+                    <span
+                      className={`font-mono text-xs tabular-nums w-6 shrink-0 ${
+                        isSelected
+                          ? 'text-red-600 dark:text-red-500 font-bold'
+                          : 'text-[#B8ADA0] dark:text-[#4A5268]'
+                      }`}
+                    >
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+
+                    <div className="relative w-20 h-12 shrink-0 overflow-hidden rounded-sm bg-[#E5DFD2] dark:bg-[#131826]">
+                      <img
+                        loading="lazy"
+                        src={video.thumbnail}
+                        alt={video.title}
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-white/40 dark:bg-slate-950/40 flex items-center justify-center">
-                        <div className={`p-1.5 rounded-full ${isSelected ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}`}>
-                          <Play className="w-3.5 h-3.5 fill-current" />
-                        </div>
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <Play
+                          className={`w-3.5 h-3.5 fill-current ${
+                            isSelected ? 'text-red-500' : 'text-white/90'
+                          }`}
+                        />
                       </div>
                     </div>
 
-                    <div className="space-y-1 min-w-0 flex-1">
-                      <p className="text-xs font-bold truncate text-white leading-tight">
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className={`text-[13px] font-semibold truncate leading-snug ${
+                          isSelected ? 'text-red-600 dark:text-red-500' : ''
+                        }`}
+                      >
                         {video.title}
                       </p>
-                      <div className="flex items-center space-x-2 text-[11px] text-slate-500 dark:text-slate-400">
-                        <span>{video.category}</span>
-                        <span>•</span>
-                        <span>{video.duration}</span>
-                      </div>
+                      <p className="font-mono text-[10px] text-[#8A6D3B] dark:text-[#6B7280] mt-0.5">
+                        {video.category} · {video.duration}
+                      </p>
                     </div>
                   </button>
                 );
               })}
             </div>
           </div>
-
         </div>
-
       </div>
     </section>
   );
