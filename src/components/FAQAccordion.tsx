@@ -14,21 +14,21 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({ faqs }) => {
 
   const filteredFaqs = selectedCategory === 'All' 
     ? faqs 
-    : faqs.filter(f => f.category === selectedCategory);
+    : (faqs || []).filter(f => f.category === selectedCategory);
 
   const toggleFAQ = (id: string) => {
     setOpenId(openId === id ? null : id);
   };
 
   return (
-    <section id="about" className="py-20 bg-white dark:bg-slate-950 text-slate-900 dark:text-white transition-colors relative">
+    <section id="about" className="py-20 bg-emerald-50/40 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* About School Overview Grid */}
         <div className="mb-20 space-y-12">
           
           <div className="text-center max-w-3xl mx-auto space-y-4">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
               <BookOpen className="w-4 h-4" />
               <span>About St. Teresa Gatura Girls</span>
             </div>
@@ -61,59 +61,59 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({ faqs }) => {
 
               <ul className="space-y-2.5 text-sm text-slate-700 dark:text-slate-200">
                 <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>Mathematics, Physics, Chemistry & Biology Focus</span>
                 </li>
                 <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>Humanities: History, Geography, CRE, Business Studies</span>
                 </li>
                 <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>Languages: English, Kiswahili, French & German Options</span>
                 </li>
                 <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>Targeted KCSE Revision & Mentorship Workshops</span>
                 </li>
               </ul>
             </div>
 
             {/* CBC Senior Secondary Card */}
-            <div className="p-8 rounded-3xl bg-slate-900 text-white border border-emerald-500/40 shadow-2xl space-y-5 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-emerald-500 text-slate-950 font-extrabold text-[10px] uppercase tracking-wider px-3 py-1 rounded-bl-xl">
+            <div className="p-8 rounded-3xl bg-emerald-50 dark:bg-slate-900 text-slate-900 dark:text-white border border-emerald-500/40 shadow-md space-y-5 relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-emerald-600 text-white font-extrabold text-[10px] uppercase tracking-wider px-3 py-1 rounded-bl-xl">
                 Grade 10–12 CBC Ready
               </div>
 
               <div className="flex items-center space-x-3">
-                <div className="p-3 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <div className="p-3 rounded-2xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-emerald-500/30">
                   <Layers className="w-7 h-7" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-extrabold text-white">CBC Senior Secondary Pathways</h3>
-                  <p className="text-xs font-semibold text-emerald-400 uppercase">Competency-Based Learning</p>
+                  <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">CBC Senior Secondary Pathways</h3>
+                  <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase">Competency-Based Learning</p>
                 </div>
               </div>
 
-              <p className="text-sm text-slate-300 leading-relaxed font-light">
+              <p className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-light">
                 Tailored educational pathways equipping learners with practical competencies, digital skills, and career orientation.
               </p>
 
-              <ul className="space-y-2.5 text-sm text-slate-200">
+              <ul className="space-y-2.5 text-sm text-slate-700 dark:text-slate-200">
                 <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span><strong>STEM Pathway:</strong> Pure Sciences, Computer Science & Engineering Studies</span>
                 </li>
                 <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span><strong>Social Sciences Pathway:</strong> Literature, Languages, Business & History</span>
                 </li>
                 <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span><strong>Arts & Sports Science Pathway:</strong> Performing Arts, Fine Art & Athletics</span>
                 </li>
                 <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>Practical Community Service Learning (CSL) Projects</span>
                 </li>
               </ul>
@@ -142,7 +142,7 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({ faqs }) => {
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                   selectedCategory === cat
-                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30'
+                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                 }`}
               >
@@ -162,10 +162,10 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({ faqs }) => {
                 >
                   <button
                     onClick={() => toggleFAQ(faq.id)}
-                    className="w-full flex items-center justify-between p-5 text-left font-semibold text-base text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 focus:outline-none"
+                    className="w-full flex items-center justify-between p-5 text-left font-semibold text-base text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-700 dark:text-emerald-400 focus:outline-none"
                   >
                     <span className="pr-4">{faq.question}</span>
-                    <ChevronDown className={`w-5 h-5 text-emerald-500 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
                   </button>
 
                   {isOpen && (

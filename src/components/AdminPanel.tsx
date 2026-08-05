@@ -63,7 +63,7 @@ interface AdminPanelProps {
   featuredVideos?: FeaturedVideo[];
   messages: ContactMessage[];
   links: UsefulLink[];
-  onRefreshData: () => void;
+  onRefreshData: (force?: boolean) => void;
   setNews?: React.Dispatch<React.SetStateAction<NewsItem[]>>;
   setJobs?: React.Dispatch<React.SetStateAction<JobPosting[]>>;
   setBanners?: React.Dispatch<React.SetStateAction<BannerAd[]>>;
@@ -157,7 +157,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [editingGalleryItem, setEditingGalleryItem] = useState<GalleryItem | null>(null);
   const [isGallerySaving, setIsGallerySaving] = useState<boolean>(false);
 
+
+  React.useEffect(() => {
+    if (isOpen) {
+      onRefreshData(true);
+    }
+  }, [isOpen, onRefreshData]);
+
   if (!isOpen) return null;
+
 
   // Save Cloudinary configuration
   const handleSaveCloudinarySettings = (e: React.FormEvent) => {
@@ -171,39 +179,28 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     showToast('Cloudinary settings saved successfully!');
   };
 
-  // Upload single photo to Cloudinary with automatic local compression fallback
+  // Upload single photo to Cloudinary
   const handleCloudinarySingleUpload = async (file: File, setUrl: (url: string) => void) => {
     setIsCloudinaryUploading(true);
     setCloudinaryStatusMsg(`Uploading "${file.name}" to Cloudinary...`);
     try {
-      if (!cloudinaryConfig.cloudName.trim()) {
-        throw new Error('Cloud Name not configured');
-      }
       const res = await uploadToCloudinary(file, cloudinaryConfig.cloudName, cloudinaryConfig.uploadPreset);
       setUrl(res.url);
       showToast('Photo uploaded to Cloudinary CDN!');
     } catch (err: any) {
-      console.warn('Cloudinary upload error:', err);
-      setCloudinaryStatusMsg(`Optimizing "${file.name}" locally...`);
-      try {
-        const compressedDataUrl = await compressImageFileToDataUrl(file);
-        setUrl(compressedDataUrl);
-        showToast('Photo processed & attached with local optimizer!');
-      } catch (localErr) {
-        showToast(`Failed to process image file: ${localErr}`);
-      }
+      alert(`Upload failed: ${err.message}`);
     } finally {
       setIsCloudinaryUploading(false);
       setCloudinaryStatusMsg('');
     }
   };
 
-  // Batch Upload photos to Cloudinary and create Firestore Gallery entries (with fallback)
+  // Batch Upload photos to Cloudinary and create Firestore Gallery entries
   const handleCloudinaryBatchUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-
     setIsCloudinaryUploading(true);
+
     const fileList: File[] = Array.from(files);
     let successCount = 0;
 
@@ -214,62 +211,33 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       const formattedTitle = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1);
 
       try {
-        let imageUrl = '';
-        if (cloudinaryConfig.cloudName.trim()) {
-          try {
-            const res = await uploadToCloudinary(file, cloudinaryConfig.cloudName, cloudinaryConfig.uploadPreset);
-            imageUrl = res.url;
-          } catch (cErr: any) {
-            console.warn(`Cloudinary failed for ${file.name}, using local optimizer:`, cErr);
-            imageUrl = await compressImageFileToDataUrl(file);
-          }
-        } else {
-          imageUrl = await compressImageFileToDataUrl(file);
-        }
-
+        const res = await uploadToCloudinary(file, cloudinaryConfig.cloudName, cloudinaryConfig.uploadPreset);
         await galleryService.create({
           title: formattedTitle,
           category: newGallery.category || 'Academics',
-          imageUrl: imageUrl,
+          imageUrl: res.url,
           caption: `School Gallery • ${new Date().toLocaleDateString()}`
         });
         successCount++;
       } catch (err: any) {
-        console.error(`Error processing gallery item ${file.name}:`, err);
+        alert(`Error processing gallery item ${file.name}: ${err.message}`);
       }
     }
-
     setIsCloudinaryUploading(false);
     setCloudinaryStatusMsg('');
-    showToast(`Batch Upload Complete! Added ${successCount} photo(s) to gallery.`);
+    onRefreshData(true); showToast(`Batch Upload Complete! Added ${successCount} photo(s) to gallery.`);
   };
-
-  // File upload helper converts chosen file to Data URL with canvas compression
+  // File upload helper routes to Cloudinary single upload
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, setUrl: (val: string) => void) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     if (file.size > 15 * 1024 * 1024) {
       showToast('Please select an image smaller than 15MB.');
       return;
     }
 
-    // If Cloudinary configured, attempt Cloudinary with fallback
-    if (cloudinaryConfig.cloudName.trim()) {
-      await handleCloudinarySingleUpload(file, setUrl);
-    } else {
-      setIsCloudinaryUploading(true);
-      setCloudinaryStatusMsg(`Processing & compressing "${file.name}"...`);
-      try {
-        const compressedDataUrl = await compressImageFileToDataUrl(file);
-        setUrl(compressedDataUrl);
-        showToast('Photo processed & attached successfully!');
-      } catch (err: any) {
-        showToast(`Error processing image: ${err.message || err}`);
-      } finally {
-        setIsCloudinaryUploading(false);
-        setCloudinaryStatusMsg('');
-      }
-    }
+    await handleCloudinarySingleUpload(file, setUrl);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -867,10 +835,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl animate-fade-in overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950/90 backdrop-blur-xl animate-fade-in overflow-y-auto">
       {/* Floating Toast Notification */}
       {toastMsg && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl bg-emerald-500 text-slate-950 font-extrabold text-xs sm:text-sm shadow-2xl flex items-center space-x-2 animate-bounce border border-emerald-400">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl bg-emerald-600 text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center space-x-2 animate-bounce border border-emerald-400">
           <CheckCircle2 className="w-5 h-5 text-slate-950 shrink-0" />
           <span>{toastMsg}</span>
         </div>
@@ -878,19 +846,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
       {/* Custom Confirmation Modal (iframe safe, no browser popup blocking) */}
       {confirmModal && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-fade-in">
-          <div className="max-w-md w-full bg-slate-900 border border-red-500/40 rounded-3xl p-6 space-y-5 shadow-2xl relative">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950/90 backdrop-blur-md animate-fade-in">
+          <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-red-500/40 rounded-3xl p-6 space-y-5 shadow-md relative">
             <div className="flex items-center space-x-3 text-red-400">
               <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/20 shrink-0">
                 <Trash2 className="w-6 h-6 text-red-500" />
               </div>
               <div>
-                <h3 className="text-base font-extrabold text-white">{confirmModal.title}</h3>
-                <p className="text-xs text-slate-400 font-medium">Please confirm this action</p>
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">{confirmModal.title}</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-500 dark:text-slate-400 font-medium">Please confirm this action</p>
               </div>
             </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-300 dark:border-slate-800">
               {confirmModal.message}
             </p>
 
@@ -898,7 +866,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <button
                 type="button"
                 onClick={() => setConfirmModal(null)}
-                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors"
+                className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold transition-colors"
               >
                 Cancel
               </button>
@@ -910,7 +878,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   setConfirmModal(null);
                   await action();
                 }}
-                className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold shadow-lg shadow-red-600/30 transition-all"
+                className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-slate-900 dark:text-white text-xs font-extrabold shadow-sm shadow-red-600/30 transition-all"
               >
                 {confirmModal.actionLabel || 'Confirm Delete'}
               </button>
@@ -919,17 +887,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
       )}
 
-      <div className="max-w-5xl w-full bg-slate-900 text-white border border-emerald-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative max-h-[92vh] overflow-y-auto">
+      <div className="max-w-5xl w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-emerald-500/30 rounded-3xl p-6 sm:p-8 shadow-md space-y-6 relative max-h-[92vh] overflow-y-auto">
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="flex items-center justify-between border-b border-slate-300 dark:border-slate-800 pb-4">
           <div className="flex items-center space-x-3">
-            <div className="p-3 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            <div className="p-3 rounded-2xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-slate-200 dark:border-emerald-500/30">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-extrabold text-xl text-white">School Photo & Content Admin Console</h3>
-              <p className="text-xs text-slate-400">St. Teresa Gatura Girls Senior School • Upload & Manage Website Photos</p>
+              <h3 className="font-extrabold text-xl text-slate-900 dark:text-white">School Photo & Content Admin Console</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-500 dark:text-slate-400">St. Teresa Gatura Girls Senior School • Upload & Manage Website Photos</p>
             </div>
           </div>
 
@@ -954,13 +922,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             {isAuthenticated && (
               <button
                 onClick={() => setIsAuthenticated(false)}
-                className="flex items-center space-x-1 px-3 py-2 rounded-xl bg-slate-800 hover:bg-red-500/20 text-slate-300 hover:text-red-400 text-xs font-semibold"
+                className="flex items-center space-x-1 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-red-500/20 text-slate-600 dark:text-slate-300 hover:text-red-400 text-xs font-semibold"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="hidden sm:inline">Logout</span>
               </button>
             )}
-            <button onClick={onClose} className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white">
+            <button onClick={onClose} className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -969,12 +937,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         {/* LOGIN FORM IF NOT AUTHENTICATED */}
         {!isAuthenticated ? (
           <div className="max-w-md mx-auto py-8 space-y-6 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-slate-200 dark:border-emerald-500/30 flex items-center justify-center mx-auto">
               <Lock className="w-8 h-8" />
             </div>
             <div className="space-y-1">
-              <h4 className="text-2xl font-bold text-white">Administrator Login</h4>
-              <p className="text-xs text-slate-400">Enter administration credentials or demo passkey to update website photos</p>
+              <h4 className="text-2xl font-bold text-slate-900 dark:text-white">Administrator Login</h4>
+              <p className="text-xs text-slate-600 dark:text-slate-500 dark:text-slate-400">Enter administration credentials or demo passkey to update website photos</p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4 text-left">
@@ -985,32 +953,32 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               )}
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-300">Admin Email</label>
+                <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Admin Email</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@stteresagaturagirls.sc.ke"
-                  className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-emerald-500"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-emerald-500"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-300">Password / Access Key *</label>
+                <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Password / Access Key *</label>
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter password (e.g. admin123)"
-                  className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-emerald-500"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-emerald-500"
                 />
-                <p className="text-[10px] text-emerald-400 mt-1">Hint: Demo Passkey is <strong>admin123</strong> or <strong>gatura2027</strong></p>
+                <p className="text-[10px] text-emerald-700 dark:text-emerald-400 mt-1">Hint: Demo Passkey is <strong>admin123</strong> or <strong>gatura2027</strong></p>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20"
+                className="w-full py-3.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm shadow-sm shadow-emerald-500/20"
               >
                 Authenticate & Access Dashboard
               </button>
@@ -1026,14 +994,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <div className="flex items-center justify-between border-b border-blue-500/20 pb-3">
                   <div className="flex items-center space-x-2.5">
                     <Cloud className="w-5 h-5 text-blue-400" />
-                    <h4 className="font-bold text-sm text-white">Cloudinary Image CDN Settings</h4>
+                    <h4 className="font-bold text-sm text-slate-900 dark:text-white">Cloudinary Image CDN Settings</h4>
                     <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-bold">Photo Gallery Engine</span>
                   </div>
                   {cloudinaryConfig.cloudName && (
                     <button
                       type="button"
                       onClick={() => setShowCloudinaryConfig(false)}
-                      className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+                      className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -1049,9 +1017,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="e.g. gaturagirls or dxyz123"
                       value={cloudinaryConfig.cloudName}
                       onChange={(e) => setCloudinaryConfig({ ...cloudinaryConfig, cloudName: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-blue-500/30 text-white text-xs focus:border-blue-400"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-blue-500/30 text-slate-900 dark:text-white text-xs focus:border-blue-400"
                     />
-                    <p className="text-[10px] text-slate-400">Found in your Cloudinary Dashboard under Account Details.</p>
+                    <p className="text-[10px] text-slate-600 dark:text-slate-500 dark:text-slate-400">Found in your Cloudinary Dashboard under Account Details.</p>
                   </div>
 
                   <div className="sm:col-span-4 space-y-1">
@@ -1061,15 +1029,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="ml_default or school_gallery"
                       value={cloudinaryConfig.uploadPreset}
                       onChange={(e) => setCloudinaryConfig({ ...cloudinaryConfig, uploadPreset: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-blue-500/30 text-white text-xs focus:border-blue-400"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-blue-500/30 text-slate-900 dark:text-white text-xs focus:border-blue-400"
                     />
-                    <p className="text-[10px] text-slate-400">Set up under Settings → Upload → Upload Presets (Unsigned).</p>
+                    <p className="text-[10px] text-slate-600 dark:text-slate-500 dark:text-slate-400">Set up under Settings → Upload → Upload Presets (Unsigned).</p>
                   </div>
 
                   <div className="sm:col-span-3 flex items-end">
                     <button
                       type="submit"
-                      className="w-full py-2.5 px-4 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-lg shadow-blue-500/20"
+                      className="w-full py-2.5 px-4 rounded-xl bg-blue-500 hover:bg-blue-600 text-slate-900 dark:text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-sm shadow-blue-500/20"
                     >
                       <Check className="w-4 h-4" />
                       <span>Save Cloudinary Settings</span>
@@ -1080,11 +1048,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             )}
             
             {/* Navigation Tabs */}
-            <div className="flex items-center space-x-2 border-b border-slate-800 pb-3 overflow-x-auto text-xs font-bold">
+            <div className="flex items-center space-x-2 border-b border-slate-300 dark:border-slate-800 pb-3 overflow-x-auto text-xs font-bold">
               <button
                 onClick={() => setActiveTab('hero')}
                 className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-colors ${
-                  activeTab === 'hero' ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-300 hover:text-white'
+                  activeTab === 'hero' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
                 }`}
               >
                 <Camera className="w-4 h-4" />
@@ -1094,17 +1062,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <button
                 onClick={() => setActiveTab('videos')}
                 className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-colors ${
-                  activeTab === 'videos' ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-300 hover:text-white'
+                  activeTab === 'videos' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
                 }`}
               >
-                <Film className="w-4 h-4 text-emerald-400" />
+                <Film className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                 <span>Featured Videos ({featuredVideos.length})</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('leadership')}
                 className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-colors ${
-                  activeTab === 'leadership' ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-300 hover:text-white'
+                  activeTab === 'leadership' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
                 }`}
               >
                 <Users className="w-4 h-4" />
@@ -1114,7 +1082,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <button
                 onClick={() => setActiveTab('gallery')}
                 className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-colors ${
-                  activeTab === 'gallery' ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-300 hover:text-white'
+                  activeTab === 'gallery' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
                 }`}
               >
                 <ImageIcon className="w-4 h-4" />
@@ -1124,7 +1092,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <button
                 onClick={() => setActiveTab('banners')}
                 className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-colors ${
-                  activeTab === 'banners' ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-300 hover:text-white'
+                  activeTab === 'banners' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
                 }`}
               >
                 <Megaphone className="w-4 h-4" />
@@ -1134,7 +1102,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <button
                 onClick={() => setActiveTab('news')}
                 className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-colors ${
-                  activeTab === 'news' ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-300 hover:text-white'
+                  activeTab === 'news' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
                 }`}
               >
                 <Newspaper className="w-4 h-4" />
@@ -1144,7 +1112,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <button
                 onClick={() => setActiveTab('jobs')}
                 className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-colors ${
-                  activeTab === 'jobs' ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-300 hover:text-white'
+                  activeTab === 'jobs' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
                 }`}
               >
                 <Briefcase className="w-4 h-4" />
@@ -1154,7 +1122,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <button
                 onClick={() => setActiveTab('messages')}
                 className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-colors ${
-                  activeTab === 'messages' ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-300 hover:text-white'
+                  activeTab === 'messages' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
                 }`}
               >
                 <MessageSquare className="w-4 h-4" />
@@ -1166,17 +1134,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             {activeTab === 'videos' && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Left Column: Video Add/Edit Form */}
-                <div className="lg:col-span-5 p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+                <div className="lg:col-span-5 p-6 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-sm text-emerald-400 uppercase tracking-wider flex items-center space-x-2">
-                      <Film className="w-4 h-4 text-emerald-500" />
+                    <h4 className="font-bold text-sm text-emerald-700 dark:text-emerald-400 uppercase tracking-wider flex items-center space-x-2">
+                      <Film className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                       <span>{isEditingVideo ? 'Edit Featured Video' : 'Add New Featured Video'}</span>
                     </h4>
                     {isEditingVideo && (
                       <button
                         type="button"
                         onClick={handleCancelEditVideo}
-                        className="text-[11px] text-slate-400 hover:text-white underline"
+                        className="text-[11px] text-slate-600 dark:text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white underline"
                       >
                         Cancel Edit
                       </button>
@@ -1186,20 +1154,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   <form onSubmit={handleSaveVideo} className="space-y-4">
                     {/* 1. Video Title */}
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-300">1. Video Title *</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">1. Video Title *</label>
                       <input
                         type="text"
                         required
                         placeholder="e.g. School Anthem 2024"
                         value={videoForm.title}
                         onChange={(e) => setVideoForm({ ...videoForm, title: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:border-emerald-500"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-emerald-500"
                       />
                     </div>
 
                     {/* 2. YouTube Video Link / ID */}
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-300">2. YouTube Video Link or ID *</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">2. YouTube Video Link or ID *</label>
                       <input
                         type="text"
                         required
@@ -1215,12 +1183,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             thumbnailUrl: (!videoForm.thumbnailUrl && extracted) ? getYouTubeThumbnailUrl(extracted) : videoForm.thumbnailUrl
                           });
                         }}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:border-emerald-500"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-emerald-500"
                       />
                       {videoForm.youtubeUrl && (
                         <div className="mt-1 text-[11px]">
                           {extractYouTubeVideoId(videoForm.youtubeUrl) ? (
-                            <span className="text-emerald-400 font-medium inline-flex items-center space-x-1">
+                            <span className="text-emerald-700 dark:text-emerald-400 font-medium inline-flex items-center space-x-1">
                               <Check className="w-3.5 h-3.5" />
                               <span>Detected Video ID: <strong>{extractYouTubeVideoId(videoForm.youtubeUrl)}</strong></span>
                             </span>
@@ -1235,13 +1203,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                     {/* 3. Description */}
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-300">3. Description (Optional)</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">3. Description (Optional)</label>
                       <textarea
                         rows={2}
                         placeholder="Short blurb shown under the video title on public site..."
                         value={videoForm.description}
                         onChange={(e) => setVideoForm({ ...videoForm, description: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:border-emerald-500 resize-none"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-emerald-500 resize-none"
                       />
                     </div>
 
@@ -1249,13 +1217,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <div className="grid grid-cols-2 gap-4">
                       {/* Featured Toggle */}
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-300">4. Featured</label>
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300">4. Featured</label>
                         <div
                           onClick={() => setVideoForm({ ...videoForm, featured: !videoForm.featured })}
                           className={`cursor-pointer px-3 py-2 rounded-xl border flex items-center justify-between text-xs font-bold transition-colors ${
                             videoForm.featured
-                              ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
-                              : 'bg-slate-900 border-slate-800 text-slate-400'
+                              ? 'bg-emerald-500/20 border-emerald-500 text-emerald-700 dark:text-emerald-400'
+                              : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-800 text-slate-600 dark:text-slate-500 dark:text-slate-400'
                           }`}
                         >
                           <span className="flex items-center space-x-1.5">
@@ -1263,7 +1231,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             <span>{videoForm.featured ? 'Featured First' : 'Standard'}</span>
                           </span>
                           <span className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                            videoForm.featured ? 'bg-emerald-500 border-emerald-400 text-slate-950' : 'border-slate-700'
+                            videoForm.featured ? 'bg-emerald-500 border-emerald-400 text-slate-950' : 'border-slate-200 dark:border-slate-700'
                           }`}>
                             {videoForm.featured && <Check className="w-3 h-3 stroke-[3]" />}
                           </span>
@@ -1272,23 +1240,23 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                       {/* Display Order */}
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-300">5. Display Order</label>
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300">5. Display Order</label>
                         <input
                           type="number"
                           min={1}
                           value={videoForm.order}
                           onChange={(e) => setVideoForm({ ...videoForm, order: parseInt(e.target.value) || 1 })}
-                          className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:border-emerald-500"
+                          className="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-emerald-500"
                         />
                       </div>
                     </div>
 
                     {/* 6. Thumbnail Upload / URL */}
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">6. Thumbnail Image (Optional)</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">6. Thumbnail Image (Optional)</label>
                       <div className="flex items-center space-x-2">
-                        <label className="flex-1 cursor-pointer px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 flex items-center justify-center space-x-2">
-                          <Upload className="w-3.5 h-3.5 text-emerald-400" />
+                        <label className="flex-1 cursor-pointer px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium border border-slate-200 dark:border-slate-700 flex items-center justify-center space-x-2">
+                          <Upload className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
                           <span>Upload File</span>
                           <input
                             type="file"
@@ -1297,7 +1265,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             className="hidden"
                           />
                         </label>
-                        <span className="text-[10px] text-slate-500">OR URL</span>
+                        <span className="text-[10px] text-slate-600">OR URL</span>
                       </div>
 
                       <input
@@ -1305,18 +1273,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         placeholder="https://img.youtube.com/vi/..."
                         value={videoForm.thumbnailUrl}
                         onChange={(e) => setVideoForm({ ...videoForm, thumbnailUrl: e.target.value })}
-                        className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                        className="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                       />
 
                       {/* Thumbnail Preview */}
                       {(videoForm.thumbnailUrl || extractYouTubeVideoId(videoForm.youtubeUrl)) && (
-                        <div className="mt-2 h-28 rounded-xl overflow-hidden border border-emerald-500/40 relative bg-slate-900">
+                        <div className="mt-2 h-28 rounded-xl overflow-hidden border border-emerald-500/40 relative bg-white dark:bg-slate-900">
                           <img
                             src={videoForm.thumbnailUrl || getYouTubeThumbnailUrl(extractYouTubeVideoId(videoForm.youtubeUrl) || '')}
                             alt="Thumbnail preview"
                             className="w-full h-full object-cover"
                           />
-                          <span className="absolute top-1 left-1 px-2 py-0.5 rounded bg-slate-950/80 text-emerald-400 text-[10px] font-bold">
+                          <span className="absolute top-1 left-1 px-2 py-0.5 rounded bg-slate-50 dark:bg-slate-950/80 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">
                             Thumbnail Preview
                           </span>
                         </div>
@@ -1328,7 +1296,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <button
                         type="submit"
                         disabled={isVideoSaving}
-                        className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-slate-950 font-bold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-emerald-500/20"
+                        className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-slate-950 font-bold text-xs flex items-center justify-center space-x-2 shadow-sm shadow-emerald-500/20"
                       >
                         {isVideoSaving ? (
                           <>
@@ -1347,9 +1315,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         <button
                           type="button"
                           onClick={() => setPreviewVideoId(extractYouTubeVideoId(videoForm.youtubeUrl))}
-                          className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center space-x-1.5 border border-slate-700"
+                          className="px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center space-x-1.5 border border-slate-200 dark:border-slate-700"
                         >
-                          <Eye className="w-4 h-4 text-emerald-400" />
+                          <Eye className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                           <span>Preview</span>
                         </button>
                       )}
@@ -1360,7 +1328,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 {/* Right Column: Active Featured Videos List */}
                 <div className="lg:col-span-7 space-y-3 max-h-[620px] overflow-y-auto pr-1">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold uppercase text-slate-400">
+                    <h4 className="text-xs font-bold uppercase text-slate-600 dark:text-slate-500 dark:text-slate-400">
                       Playlist Videos ({featuredVideos.length})
                     </h4>
                     <div className="flex items-center space-x-2">
@@ -1368,21 +1336,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         <button
                           type="button"
                           onClick={handleClearAllVideos}
-                          className="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white text-[11px] font-bold transition-colors flex items-center space-x-1 border border-red-500/30"
+                          className="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-slate-900 dark:text-white text-[11px] font-bold transition-colors flex items-center space-x-1 border border-red-500/30"
                         >
                           <Trash2 className="w-3 h-3" />
                           <span>Remove All Videos</span>
                         </button>
                       )}
-                      <span className="text-[11px] text-slate-500 hidden sm:inline">Sorted by Order & Featured</span>
+                      <span className="text-[11px] text-slate-600 hidden sm:inline">Sorted by Order & Featured</span>
                     </div>
                   </div>
 
                   {featuredVideos.length === 0 ? (
-                    <div className="p-8 text-center rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                    <div className="p-8 text-center rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 space-y-2">
                       <Film className="w-8 h-8 text-slate-600 mx-auto" />
-                      <p className="text-xs text-slate-400 font-medium">No featured videos added yet.</p>
-                      <p className="text-[11px] text-slate-500">Fill out the form on the left to add your first video.</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-500 dark:text-slate-400 font-medium">No featured videos added yet.</p>
+                      <p className="text-[11px] text-slate-600">Fill out the form on the left to add your first video.</p>
                     </div>
                   ) : (
                     [...featuredVideos]
@@ -1394,37 +1362,37 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       .map((video) => (
                         <div
                           key={video.id}
-                          className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 hover:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors"
+                          className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 hover:border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors"
                         >
                           {/* Left: Thumbnail & Details */}
                           <div className="flex items-start space-x-3 min-w-0 flex-1">
-                            <div className="relative w-28 h-16 rounded-xl overflow-hidden bg-slate-900 border border-slate-800 shrink-0 group cursor-pointer" onClick={() => setPreviewVideoId(video.videoId)}>
+                            <div className="relative w-28 h-16 rounded-xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 shrink-0 group cursor-pointer" onClick={() => setPreviewVideoId(video.videoId)}>
                               <img
                                 src={video.thumbnailUrl || getYouTubeThumbnailUrl(video.videoId)}
                                 alt={video.title}
                                 className="w-full h-full object-cover"
                               />
-                              <div className="absolute inset-0 bg-slate-950/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Play className="w-6 h-6 text-emerald-400 fill-current" />
+                              <div className="absolute inset-0 bg-slate-50 dark:bg-slate-950/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Play className="w-6 h-6 text-emerald-700 dark:text-emerald-400 fill-current" />
                               </div>
                             </div>
 
                             <div className="space-y-1 min-w-0 flex-1">
                               <div className="flex items-center space-x-2">
                                 {video.featured && (
-                                  <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase flex items-center space-x-1">
+                                  <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-[10px] font-black uppercase flex items-center space-x-1">
                                     <Star className="w-3 h-3 fill-current" />
                                     <span>Featured</span>
                                   </span>
                                 )}
-                                <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px] font-bold">
+                                <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold">
                                   Order #{video.order || 1}
                                 </span>
                               </div>
 
-                              <h5 className="text-xs font-bold truncate text-white">{video.title}</h5>
-                              <p className="text-[11px] text-slate-400 truncate line-clamp-1">{video.description || 'No description'}</p>
-                              <span className="text-[10px] text-slate-500 font-mono">ID: {video.videoId}</span>
+                              <h5 className="text-xs font-bold truncate text-slate-900 dark:text-white">{video.title}</h5>
+                              <p className="text-[11px] text-slate-600 dark:text-slate-500 dark:text-slate-400 truncate line-clamp-1">{video.description || 'No description'}</p>
+                              <span className="text-[10px] text-slate-600 font-mono">ID: {video.videoId}</span>
                             </div>
                           </div>
 
@@ -1433,25 +1401,25 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             <button
                               type="button"
                               onClick={() => setPreviewVideoId(video.videoId)}
-                              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-colors"
                               title="Preview Video"
                             >
-                              <Play className="w-4 h-4 text-emerald-400" />
+                              <Play className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                             </button>
 
                             <button
                               type="button"
                               onClick={() => handleEditVideo(video)}
-                              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-colors"
                               title="Edit Video"
                             >
-                              <Edit className="w-4 h-4 text-emerald-400" />
+                              <Edit className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                             </button>
 
                             <button
                               type="button"
                               onClick={() => handleDeleteVideo(video.id, video.title)}
-                              className="p-2 rounded-xl bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white transition-colors"
+                              className="p-2 rounded-xl bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-slate-900 dark:text-white transition-colors"
                               title="Delete Video"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -1466,22 +1434,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
             {/* VIDEO PREVIEW MODAL */}
             {previewVideoId && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
-                <div className="max-w-3xl w-full bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 space-y-4 shadow-2xl relative">
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950/90 backdrop-blur-md">
+                <div className="max-w-3xl w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-3xl p-4 sm:p-6 space-y-4 shadow-md relative">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Film className="w-5 h-5 text-emerald-400" />
-                      <h4 className="text-sm font-bold text-white">Video Player Preview</h4>
+                      <Film className="w-5 h-5 text-emerald-700 dark:text-emerald-400" />
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white">Video Player Preview</h4>
                     </div>
                     <button
                       onClick={() => setPreviewVideoId(null)}
-                      className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
+                      className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white"
                     >
                       <X className="w-5 h-5" />
                     </button>
                   </div>
 
-                  <div className="w-full aspect-video rounded-2xl overflow-hidden bg-slate-950 border border-slate-800">
+                  <div className="w-full aspect-video rounded-2xl overflow-hidden bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800">
                     <iframe
                       width="100%"
                       height="100%"
@@ -1498,8 +1466,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             )}
             {activeTab === 'hero' && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <div className="lg:col-span-5 p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
-                  <h4 className="font-bold text-sm text-emerald-400 uppercase tracking-wider flex items-center space-x-2">
+                <div className="lg:col-span-5 p-6 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 space-y-4">
+                  <h4 className="font-bold text-sm text-emerald-700 dark:text-emerald-400 uppercase tracking-wider flex items-center space-x-2">
                     <Plus className="w-4 h-4" />
                     <span>Add / Update Hero Section Slide Photo</span>
                   </h4>
@@ -1511,7 +1479,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Slide Title (e.g. Modern Science & Robotics Lab)"
                       value={newHero.title}
                       onChange={(e) => setNewHero({ ...newHero, title: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:border-emerald-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-emerald-500"
                     />
 
                     <input
@@ -1520,7 +1488,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Subtitle / Caption"
                       value={newHero.subtitle}
                       onChange={(e) => setNewHero({ ...newHero, subtitle: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:border-emerald-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-emerald-500"
                     />
 
                     <input
@@ -1528,12 +1496,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Tag (e.g. Grade 10 STEM / Champions)"
                       value={newHero.tag}
                       onChange={(e) => setNewHero({ ...newHero, tag: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                     />
 
                     {/* Image File Upload & URL Picker */}
                     <div className="space-y-2">
-                      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Upload Slide Photo</label>
+                      <label className="text-[11px] font-bold text-slate-600 dark:text-slate-500 dark:text-slate-400 uppercase tracking-wider">Upload Slide Photo</label>
                       <div className="grid grid-cols-2 gap-2">
                         <label className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 rounded-xl cursor-pointer text-xs font-bold text-blue-400">
                           <Cloud className="w-4 h-4" />
@@ -1549,8 +1517,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           />
                         </label>
 
-                        <label className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-slate-900 border border-slate-700 hover:border-slate-600 rounded-xl cursor-pointer text-xs font-bold text-slate-300">
-                          <Upload className="w-4 h-4 text-emerald-400" />
+                        <label className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-slate-600 rounded-xl cursor-pointer text-xs font-bold text-slate-600 dark:text-slate-300">
+                          <Upload className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                           <span>Local File</span>
                           <input
                             type="file"
@@ -1566,16 +1534,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         placeholder="Image URL (https://...)"
                         value={newHero.image}
                         onChange={(e) => setNewHero(prev => ({ ...prev, image: e.target.value }))}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                       />
 
                       {newHero.image && (
                         <div className="mt-2 h-24 rounded-xl overflow-hidden border border-emerald-500/50 relative">
-                          <img src={newHero.image} alt="Preview" className="w-full h-full object-cover" />
+                          <img loading="lazy" src={newHero.image} alt="Preview" className="w-full h-full object-cover" />
                           <button
                             type="button"
                             onClick={() => setNewHero(prev => ({ ...prev, image: '' }))}
-                            className="absolute top-1 right-1 p-1 rounded-full bg-slate-950/80 text-red-400 hover:text-white"
+                            className="absolute top-1 right-1 p-1 rounded-full bg-slate-50 dark:bg-slate-950/80 text-red-400 hover:text-slate-900 dark:text-white"
                           >
                             <X className="w-3.5 h-3.5" />
                           </button>
@@ -1585,7 +1553,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                     <button
                       type="submit"
-                      className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs"
+                      className="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs"
                     >
                       Publish Hero Slide Photo
                     </button>
@@ -1594,12 +1562,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 <div className="lg:col-span-7 space-y-3 max-h-[500px] overflow-y-auto pr-1">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold uppercase text-slate-400">Active Hero Slides ({heroSlides.length})</h4>
+                    <h4 className="text-xs font-bold uppercase text-slate-600 dark:text-slate-500 dark:text-slate-400">Active Hero Slides ({heroSlides.length})</h4>
                     {heroSlides.length > 0 && (
                       <button
                         type="button"
                         onClick={handleClearAllHero}
-                        className="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white text-[11px] font-bold transition-colors flex items-center space-x-1 border border-red-500/30"
+                        className="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-slate-900 dark:text-white text-[11px] font-bold transition-colors flex items-center space-x-1 border border-red-500/30"
                       >
                         <Trash2 className="w-3 h-3" />
                         <span>Remove All Hero Slides</span>
@@ -1607,16 +1575,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     )}
                   </div>
                   {heroSlides.map((slide) => (
-                    <div key={slide.id} className="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center space-x-4">
-                      <img src={slide.image} alt={slide.title} className="w-24 h-16 rounded-xl object-cover shrink-0 border border-slate-800" />
+                    <div key={slide.id} className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 flex items-center space-x-4">
+                      <img loading="lazy" src={slide.image} alt={slide.title} className="w-24 h-16 rounded-xl object-cover shrink-0 border border-slate-300 dark:border-slate-800" />
                       <div className="flex-1 min-w-0 space-y-1">
-                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase">{slide.tag}</span>
-                        <h5 className="text-xs font-bold truncate text-white">{slide.title}</h5>
-                        <p className="text-[11px] text-slate-400 truncate">{slide.subtitle}</p>
+                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase">{slide.tag}</span>
+                        <h5 className="text-xs font-bold truncate text-slate-900 dark:text-white">{slide.title}</h5>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-500 dark:text-slate-400 truncate">{slide.subtitle}</p>
                       </div>
                       <button
                         onClick={() => handleDeleteHero(slide.id)}
-                        className="p-2 rounded-xl bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white transition-colors"
+                        className="p-2 rounded-xl bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-slate-900 dark:text-white transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -1629,8 +1597,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             {/* TAB: LEADERSHIP PHOTOS MANAGEMENT */}
             {activeTab === 'leadership' && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <div className="lg:col-span-5 p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
-                  <h4 className="font-bold text-sm text-emerald-400 uppercase tracking-wider flex items-center space-x-2">
+                <div className="lg:col-span-5 p-6 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 space-y-4">
+                  <h4 className="font-bold text-sm text-emerald-700 dark:text-emerald-400 uppercase tracking-wider flex items-center space-x-2">
                     <UserPlus className="w-4 h-4" />
                     <span>Add / Edit Leadership Member Photo</span>
                   </h4>
@@ -1642,7 +1610,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Leader Full Name (e.g. Sr. Beatrice Mwangi)"
                       value={newLeader.name}
                       onChange={(e) => setNewLeader({ ...newLeader, name: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                     />
 
                     <input
@@ -1651,7 +1619,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Role (e.g. Principal / Deputy Principal)"
                       value={newLeader.role}
                       onChange={(e) => setNewLeader({ ...newLeader, role: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                     />
 
                     <input
@@ -1659,12 +1627,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Academic Title / Qualifications"
                       value={newLeader.title}
                       onChange={(e) => setNewLeader({ ...newLeader, title: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                     />
 
                     {/* Profile Photo Upload */}
                     <div className="space-y-2">
-                      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Profile Photo Upload</label>
+                      <label className="text-[11px] font-bold text-slate-600 dark:text-slate-500 dark:text-slate-400 uppercase tracking-wider">Profile Photo Upload</label>
                       <div className="grid grid-cols-2 gap-2">
                         <label className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 rounded-xl cursor-pointer text-xs font-bold text-blue-400">
                           <Cloud className="w-4 h-4" />
@@ -1680,8 +1648,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           />
                         </label>
 
-                        <label className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-slate-900 border border-slate-700 hover:border-slate-600 rounded-xl cursor-pointer text-xs font-bold text-slate-300">
-                          <Upload className="w-4 h-4 text-emerald-400" />
+                        <label className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-slate-600 rounded-xl cursor-pointer text-xs font-bold text-slate-600 dark:text-slate-300">
+                          <Upload className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                           <span>Local File</span>
                           <input
                             type="file"
@@ -1697,16 +1665,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         placeholder="OR Photo URL"
                         value={newLeader.imageUrl}
                         onChange={(e) => setNewLeader(prev => ({ ...prev, imageUrl: e.target.value }))}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                       />
 
                       {newLeader.imageUrl && (
                         <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-emerald-500 mx-auto relative group">
-                          <img src={newLeader.imageUrl} alt="Leader Preview" className="w-full h-full object-cover" />
+                          <img loading="lazy" src={newLeader.imageUrl} alt="Leader Preview" className="w-full h-full object-cover" />
                           <button
                             type="button"
                             onClick={() => setNewLeader(prev => ({ ...prev, imageUrl: '' }))}
-                            className="absolute inset-0 bg-slate-950/70 text-red-400 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute inset-0 bg-slate-50 dark:bg-slate-950/70 text-red-400 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                             title="Remove Photo"
                           >
                             <X className="w-5 h-5" />
@@ -1720,7 +1688,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Leadership Quote"
                       value={newLeader.quote}
                       onChange={(e) => setNewLeader({ ...newLeader, quote: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs resize-none"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs resize-none"
                     />
 
                     <textarea
@@ -1728,12 +1696,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Biography / Summary"
                       value={newLeader.bio}
                       onChange={(e) => setNewLeader({ ...newLeader, bio: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs resize-none"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs resize-none"
                     />
 
                     <button
                       type="submit"
-                      className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs"
+                      className="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs"
                     >
                       Save Leadership Profile & Photo
                     </button>
@@ -1742,12 +1710,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 <div className="lg:col-span-7 space-y-3 max-h-[500px] overflow-y-auto pr-1">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold uppercase text-slate-400">Current Leadership Profiles ({leadership.length})</h4>
+                    <h4 className="text-xs font-bold uppercase text-slate-600 dark:text-slate-500 dark:text-slate-400">Current Leadership Profiles ({leadership.length})</h4>
                     {leadership.length > 0 && (
                       <button
                         type="button"
                         onClick={handleClearAllLeader}
-                        className="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white text-[11px] font-bold transition-colors flex items-center space-x-1 border border-red-500/30"
+                        className="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-slate-900 dark:text-white text-[11px] font-bold transition-colors flex items-center space-x-1 border border-red-500/30"
                       >
                         <Trash2 className="w-3 h-3" />
                         <span>Remove All Leadership Profiles</span>
@@ -1755,16 +1723,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     )}
                   </div>
                   {leadership.map((l) => (
-                    <div key={l.id} className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex items-center space-x-4">
-                      <img src={l.imageUrl} alt={l.name} className="w-14 h-14 rounded-full object-cover border-2 border-emerald-500/30 shrink-0" />
+                    <div key={l.id} className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 flex items-center space-x-4">
+                      <img loading="lazy" src={l.imageUrl} alt={l.name} className="w-14 h-14 rounded-full object-cover border-2 border-slate-200 dark:border-emerald-500/30 shrink-0" />
                       <div className="flex-1 min-w-0 space-y-0.5">
-                        <span className="text-[10px] font-bold uppercase text-emerald-400">{l.role}</span>
-                        <h5 className="text-xs font-bold truncate text-white">{l.name}</h5>
-                        <p className="text-[11px] text-slate-400 truncate">{l.title}</p>
+                        <span className="text-[10px] font-bold uppercase text-emerald-700 dark:text-emerald-400">{l.role}</span>
+                        <h5 className="text-xs font-bold truncate text-slate-900 dark:text-white">{l.name}</h5>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-500 dark:text-slate-400 truncate">{l.title}</p>
                       </div>
                       <button
                         onClick={() => handleDeleteLeader(l.id)}
-                        className="p-2 rounded-xl bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white transition-colors"
+                        className="p-2 rounded-xl bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-slate-900 dark:text-white transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -1779,13 +1747,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <div className="space-y-6">
                 
                 {/* CLOUDINARY BATCH UPLOADER BANNER */}
-                <div className="p-4 rounded-2xl bg-slate-950 border border-blue-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-blue-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex items-center space-x-3">
                     <div className="p-3 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30 shrink-0">
                       <CloudUpload className="w-6 h-6" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-sm text-white flex items-center space-x-2">
+                      <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center space-x-2">
                         <span>Cloudinary Photo Gallery CDN</span>
                         {cloudinaryConfig.cloudName ? (
                           <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[10px] font-bold">
@@ -1797,15 +1765,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           </span>
                         )}
                       </h4>
-                      <p className="text-xs text-slate-400">Upload single or multiple school photos directly to Cloudinary and publish automatically.</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-500 dark:text-slate-400">Upload single or multiple school photos directly to Cloudinary and publish automatically.</p>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-2 shrink-0">
-                    <label className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl cursor-pointer font-bold text-xs transition-all shadow-lg ${
+                    <label className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl cursor-pointer font-bold text-xs transition-all shadow-sm ${
                       isCloudinaryUploading
-                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                        : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20'
+                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white shadow-blue-600/20'
                     }`}>
                       {isCloudinaryUploading ? (
                         <>
@@ -1831,7 +1799,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <button
                       type="button"
                       onClick={() => setShowCloudinaryConfig(!showCloudinaryConfig)}
-                      className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white"
+                      className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white"
                       title="Cloudinary API Settings"
                     >
                       <Settings className="w-4 h-4" />
@@ -1848,8 +1816,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                   {/* Single Photo Upload Form */}
-                  <div className="lg:col-span-5 p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
-                    <h4 className="font-bold text-sm text-emerald-400 uppercase tracking-wider flex items-center space-x-2">
+                  <div className="lg:col-span-5 p-6 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 space-y-4">
+                    <h4 className="font-bold text-sm text-emerald-700 dark:text-emerald-400 uppercase tracking-wider flex items-center space-x-2">
                       <Plus className="w-4 h-4" />
                       <span>{editingGalleryItem ? 'Edit Gallery Photo' : 'Upload Single Photo'}</span>
                     </h4>
@@ -1857,22 +1825,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     {editingGalleryItem ? (
                       <form onSubmit={handleUpdateGallery} className="space-y-3">
                         <div className="space-y-1">
-                          <label className="text-[11px] font-bold text-slate-400 uppercase">Photo Title</label>
+                          <label className="text-[11px] font-bold text-slate-600 dark:text-slate-500 dark:text-slate-400 uppercase">Photo Title</label>
                           <input
                             type="text"
                             required
                             value={editingGalleryItem.title}
                             onChange={(e) => setEditingGalleryItem({ ...editingGalleryItem, title: e.target.value })}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:border-emerald-500"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-emerald-500"
                           />
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[11px] font-bold text-slate-400 uppercase">Category</label>
+                          <label className="text-[11px] font-bold text-slate-600 dark:text-slate-500 dark:text-slate-400 uppercase">Category</label>
                           <select
                             value={editingGalleryItem.category}
                             onChange={(e) => setEditingGalleryItem({ ...editingGalleryItem, category: e.target.value as any })}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                           >
                             <option value="Academics">Academics</option>
                             <option value="Facilities">Facilities</option>
@@ -1883,23 +1851,23 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[11px] font-bold text-slate-400 uppercase">Image URL (Cloudinary / Link)</label>
+                          <label className="text-[11px] font-bold text-slate-600 dark:text-slate-500 dark:text-slate-400 uppercase">Image URL (Cloudinary / Link)</label>
                           <input
                             type="url"
                             required
                             value={editingGalleryItem.imageUrl}
                             onChange={(e) => setEditingGalleryItem({ ...editingGalleryItem, imageUrl: e.target.value })}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                           />
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[11px] font-bold text-slate-400 uppercase">Caption</label>
+                          <label className="text-[11px] font-bold text-slate-600 dark:text-slate-500 dark:text-slate-400 uppercase">Caption</label>
                           <input
                             type="text"
                             value={editingGalleryItem.caption || ''}
                             onChange={(e) => setEditingGalleryItem({ ...editingGalleryItem, caption: e.target.value })}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                           />
                         </div>
 
@@ -1907,14 +1875,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           <button
                             type="submit"
                             disabled={isGallerySaving}
-                            className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs"
+                            className="flex-1 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs"
                           >
                             {isGallerySaving ? 'Saving...' : 'Update Photo Details'}
                           </button>
                           <button
                             type="button"
                             onClick={() => setEditingGalleryItem(null)}
-                            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                            className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold"
                           >
                             Cancel
                           </button>
@@ -1928,13 +1896,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           placeholder="Photo Title (e.g. Modern Chemistry Lab)"
                           value={newGallery.title}
                           onChange={(e) => setNewGallery({ ...newGallery, title: e.target.value })}
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                         />
 
                         <select
                           value={newGallery.category}
                           onChange={(e) => setNewGallery({ ...newGallery, category: e.target.value as any })}
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                         >
                           <option value="Academics">Academics</option>
                           <option value="Facilities">Facilities</option>
@@ -1945,7 +1913,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                         {/* Image Upload */}
                         <div className="space-y-2">
-                          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Photo Upload</label>
+                          <label className="text-[11px] font-bold text-slate-600 dark:text-slate-500 dark:text-slate-400 uppercase tracking-wider">Photo Upload</label>
                           
                           <div className="grid grid-cols-2 gap-2">
                             <label className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 rounded-xl cursor-pointer text-xs font-bold text-blue-400">
@@ -1962,7 +1930,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                               />
                             </label>
 
-                            <label className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-slate-900 border border-slate-700 hover:border-slate-600 rounded-xl cursor-pointer text-xs font-bold text-slate-300">
+                            <label className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-slate-600 rounded-xl cursor-pointer text-xs font-bold text-slate-600 dark:text-slate-300">
                               <Upload className="w-4 h-4" />
                               <span>Local File</span>
                               <input
@@ -1979,13 +1947,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             placeholder="OR Photo Link URL (https://...)"
                             value={newGallery.imageUrl}
                             onChange={(e) => setNewGallery({ ...newGallery, imageUrl: e.target.value })}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                           />
 
                           {newGallery.imageUrl && (
                             <div className="mt-2 h-28 rounded-xl overflow-hidden border border-emerald-500/50 relative">
-                              <img src={newGallery.imageUrl} alt="Gallery Preview" className="w-full h-full object-cover" />
-                              <span className="absolute top-1 left-1 px-2 py-0.5 rounded bg-slate-950/80 text-emerald-400 text-[10px] font-bold">Preview</span>
+                              <img loading="lazy" src={newGallery.imageUrl} alt="Gallery Preview" className="w-full h-full object-cover" />
+                              <span className="absolute top-1 left-1 px-2 py-0.5 rounded bg-slate-50 dark:bg-slate-950/80 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">Preview</span>
                             </div>
                           )}
                         </div>
@@ -1995,12 +1963,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           placeholder="Caption / Short Description"
                           value={newGallery.caption}
                           onChange={(e) => setNewGallery({ ...newGallery, caption: e.target.value })}
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                         />
 
                         <button
                           type="submit"
-                          className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20"
+                          className="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-sm shadow-emerald-500/20"
                         >
                           Add Photo To Campus Gallery
                         </button>
@@ -2011,34 +1979,34 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   {/* Existing Photo List Grid with Edit & Delete */}
                   <div className="lg:col-span-7 space-y-3">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-bold uppercase text-slate-400">Published Gallery Photos ({gallery.length})</h4>
+                      <h4 className="text-xs font-bold uppercase text-slate-600 dark:text-slate-500 dark:text-slate-400">Published Gallery Photos ({gallery.length})</h4>
                       <div className="flex items-center space-x-2">
                         {gallery.length > 0 && (
                           <button
                             type="button"
                             onClick={handleClearAllGallery}
-                            className="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white text-[11px] font-bold transition-colors flex items-center space-x-1 border border-red-500/30"
+                            className="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-slate-900 dark:text-white text-[11px] font-bold transition-colors flex items-center space-x-1 border border-red-500/30"
                           >
                             <Trash2 className="w-3 h-3" />
                             <span>Wipe All Dummy Photos</span>
                           </button>
                         )}
-                        <span className="text-[11px] text-slate-500 hidden sm:inline">Click edit or delete on any photo</span>
+                        <span className="text-[11px] text-slate-600 hidden sm:inline">Click edit or delete on any photo</span>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[520px] overflow-y-auto pr-1">
                       {gallery.map((g) => (
-                        <div key={g.id} className="relative h-36 rounded-xl overflow-hidden border border-slate-800 group bg-slate-950">
-                          <img src={g.imageUrl} alt={g.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                          <div className="absolute inset-0 bg-slate-950/75 p-2 flex flex-col justify-between opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div key={g.id} className="relative h-36 rounded-xl overflow-hidden border border-slate-300 dark:border-slate-800 group bg-slate-50 dark:bg-slate-950">
+                          <img loading="lazy" src={g.imageUrl} alt={g.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                          <div className="absolute inset-0 bg-slate-50 dark:bg-slate-950/75 p-2 flex flex-col justify-between opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                             <div className="flex items-center justify-between">
-                              <span className="px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-300 text-[9px] font-bold uppercase">{g.category}</span>
+                              <span className="px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-[9px] font-bold uppercase">{g.category}</span>
                               <div className="flex items-center space-x-1">
                                 <button
                                   type="button"
                                   onClick={() => setEditingGalleryItem(g)}
-                                  className="p-1 rounded bg-slate-800 hover:bg-emerald-600 text-white"
+                                  className="p-1 rounded bg-slate-100 dark:bg-slate-800 hover:bg-emerald-600 text-slate-900 dark:text-white"
                                   title="Edit Photo"
                                 >
                                   <Edit className="w-3 h-3" />
@@ -2046,7 +2014,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteGallery(g.id)}
-                                  className="p-1 rounded bg-red-600/80 hover:bg-red-600 text-white"
+                                  className="p-1 rounded bg-red-600/80 hover:bg-red-600 text-slate-900 dark:text-white"
                                   title="Delete Photo"
                                 >
                                   <Trash2 className="w-3 h-3" />
@@ -2054,8 +2022,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                               </div>
                             </div>
                             <div>
-                              <p className="font-bold text-white text-xs truncate">{g.title}</p>
-                              {g.caption && <p className="text-slate-400 text-[10px] truncate">{g.caption}</p>}
+                              <p className="font-bold text-slate-900 dark:text-white text-xs truncate">{g.title}</p>
+                              {g.caption && <p className="text-slate-600 dark:text-slate-500 dark:text-slate-400 text-[10px] truncate">{g.caption}</p>}
                             </div>
                           </div>
                         </div>
@@ -2069,8 +2037,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             {/* TAB: BANNERS MANAGEMENT */}
             {activeTab === 'banners' && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <div className="lg:col-span-5 p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
-                  <h4 className="font-bold text-sm text-emerald-400 uppercase tracking-wider flex items-center space-x-2">
+                <div className="lg:col-span-5 p-6 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 space-y-4">
+                  <h4 className="font-bold text-sm text-emerald-700 dark:text-emerald-400 uppercase tracking-wider flex items-center space-x-2">
                     <Plus className="w-4 h-4" />
                     <span>Add Promotional Banner Photo</span>
                   </h4>
@@ -2082,7 +2050,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Banner Title"
                       value={newBanner.title}
                       onChange={(e) => setNewBanner({ ...newBanner, title: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                     />
 
                     <input
@@ -2091,12 +2059,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Subtitle"
                       value={newBanner.subtitle}
                       onChange={(e) => setNewBanner({ ...newBanner, subtitle: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                     />
 
                     {/* Banner Image Upload */}
                     <div className="space-y-2">
-                      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Banner Image Upload</label>
+                      <label className="text-[11px] font-bold text-slate-600 dark:text-slate-500 dark:text-slate-400 uppercase tracking-wider">Banner Image Upload</label>
                       <div className="grid grid-cols-2 gap-2">
                         <label className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 rounded-xl cursor-pointer text-xs font-bold text-blue-400">
                           <Cloud className="w-4 h-4" />
@@ -2112,8 +2080,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           />
                         </label>
 
-                        <label className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-slate-900 border border-slate-700 hover:border-slate-600 rounded-xl cursor-pointer text-xs font-bold text-slate-300">
-                          <Upload className="w-4 h-4 text-emerald-400" />
+                        <label className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-slate-600 rounded-xl cursor-pointer text-xs font-bold text-slate-600 dark:text-slate-300">
+                          <Upload className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                           <span>Local File</span>
                           <input
                             type="file"
@@ -2129,16 +2097,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         placeholder="OR Image URL"
                         value={newBanner.imageUrl}
                         onChange={(e) => setNewBanner(prev => ({ ...prev, imageUrl: e.target.value }))}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                       />
 
                       {newBanner.imageUrl && (
                         <div className="mt-2 h-20 rounded-xl overflow-hidden border border-emerald-500/50 relative">
-                          <img src={newBanner.imageUrl} alt="Banner Preview" className="w-full h-full object-cover" />
+                          <img loading="lazy" src={newBanner.imageUrl} alt="Banner Preview" className="w-full h-full object-cover" />
                           <button
                             type="button"
                             onClick={() => setNewBanner(prev => ({ ...prev, imageUrl: '' }))}
-                            className="absolute top-1 right-1 p-1 rounded-full bg-slate-950/80 text-red-400 hover:text-white"
+                            className="absolute top-1 right-1 p-1 rounded-full bg-slate-50 dark:bg-slate-950/80 text-red-400 hover:text-slate-900 dark:text-white"
                           >
                             <X className="w-3.5 h-3.5" />
                           </button>
@@ -2148,7 +2116,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                     <button
                       type="submit"
-                      className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs"
+                      className="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs"
                     >
                       Add Banner Slide
                     </button>
@@ -2157,12 +2125,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 <div className="lg:col-span-7 space-y-3 max-h-[500px] overflow-y-auto">
                   <div className="flex items-center justify-between pb-2">
-                    <h4 className="text-xs font-bold uppercase text-slate-400">Promotional Banners ({banners.length})</h4>
+                    <h4 className="text-xs font-bold uppercase text-slate-600 dark:text-slate-500 dark:text-slate-400">Promotional Banners ({banners.length})</h4>
                     {banners.length > 0 && (
                       <button
                         type="button"
                         onClick={handleClearAllBanners}
-                        className="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white text-[11px] font-bold transition-colors flex items-center space-x-1 border border-red-500/30"
+                        className="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-slate-900 dark:text-white text-[11px] font-bold transition-colors flex items-center space-x-1 border border-red-500/30"
                       >
                         <Trash2 className="w-3 h-3" />
                         <span>Remove All Banners</span>
@@ -2170,15 +2138,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     )}
                   </div>
                   {banners.map((b) => (
-                    <div key={b.id} className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between space-x-4">
-                      <img src={b.imageUrl} alt={b.title} className="w-20 h-12 rounded-lg object-cover shrink-0" />
+                    <div key={b.id} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 flex items-center justify-between space-x-4">
+                      <img loading="lazy" src={b.imageUrl} alt={b.title} className="w-20 h-12 rounded-lg object-cover shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <h5 className="text-sm font-bold truncate text-white">{b.title}</h5>
-                        <p className="text-xs text-slate-400 truncate">{b.subtitle}</p>
+                        <h5 className="text-sm font-bold truncate text-slate-900 dark:text-white">{b.title}</h5>
+                        <p className="text-xs text-slate-600 dark:text-slate-500 dark:text-slate-400 truncate">{b.subtitle}</p>
                       </div>
                       <button
                         onClick={() => handleDeleteBanner(b.id)}
-                        className="p-2 rounded-xl bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white transition-colors"
+                        className="p-2 rounded-xl bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-slate-900 dark:text-white transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -2191,8 +2159,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             {/* TAB: NEWS MANAGEMENT */}
             {activeTab === 'news' && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <div className="lg:col-span-5 p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
-                  <h4 className="font-bold text-sm text-emerald-400 uppercase tracking-wider flex items-center space-x-2">
+                <div className="lg:col-span-5 p-6 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 space-y-4">
+                  <h4 className="font-bold text-sm text-emerald-700 dark:text-emerald-400 uppercase tracking-wider flex items-center space-x-2">
                     <Plus className="w-4 h-4" />
                     <span>Post News / Announcement Photo & Article</span>
                   </h4>
@@ -2204,13 +2172,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Headline / Title"
                       value={newNews.title}
                       onChange={(e) => setNewNews({ ...newNews, title: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:border-emerald-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-emerald-500"
                     />
 
                     <select
                       value={newNews.category}
                       onChange={(e) => setNewNews({ ...newNews, category: e.target.value as any })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                     >
                       <option value="Academics">Academics</option>
                       <option value="Events">Events</option>
@@ -2221,7 +2189,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                     {/* News Image Upload */}
                     <div className="space-y-2">
-                      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Featured Image Upload</label>
+                      <label className="text-[11px] font-bold text-slate-600 dark:text-slate-500 dark:text-slate-400 uppercase tracking-wider">Featured Image Upload</label>
                       <div className="grid grid-cols-2 gap-2">
                         <label className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 rounded-xl cursor-pointer text-xs font-bold text-blue-400">
                           <Cloud className="w-4 h-4" />
@@ -2237,8 +2205,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           />
                         </label>
 
-                        <label className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-slate-900 border border-slate-700 hover:border-slate-600 rounded-xl cursor-pointer text-xs font-bold text-slate-300">
-                          <Upload className="w-4 h-4 text-emerald-400" />
+                        <label className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-slate-600 rounded-xl cursor-pointer text-xs font-bold text-slate-600 dark:text-slate-300">
+                          <Upload className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                           <span>Local File</span>
                           <input
                             type="file"
@@ -2254,16 +2222,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         placeholder="OR Image URL"
                         value={newNews.imageUrl}
                         onChange={(e) => setNewNews(prev => ({ ...prev, imageUrl: e.target.value }))}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:border-emerald-500"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-emerald-500"
                       />
 
                       {newNews.imageUrl && (
                         <div className="mt-2 h-20 rounded-xl overflow-hidden border border-emerald-500/50 relative">
-                          <img src={newNews.imageUrl} alt="News Preview" className="w-full h-full object-cover" />
+                          <img loading="lazy" src={newNews.imageUrl} alt="News Preview" className="w-full h-full object-cover" />
                           <button
                             type="button"
                             onClick={() => setNewNews(prev => ({ ...prev, imageUrl: '' }))}
-                            className="absolute top-1 right-1 p-1 rounded-full bg-slate-950/80 text-red-400 hover:text-white"
+                            className="absolute top-1 right-1 p-1 rounded-full bg-slate-50 dark:bg-slate-950/80 text-red-400 hover:text-slate-900 dark:text-white"
                           >
                             <X className="w-3.5 h-3.5" />
                           </button>
@@ -2277,7 +2245,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Short Summary / Excerpt"
                       value={newNews.excerpt}
                       onChange={(e) => setNewNews({ ...newNews, excerpt: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs resize-none"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs resize-none"
                     />
 
                     <textarea
@@ -2286,12 +2254,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Full Article Content"
                       value={newNews.content}
                       onChange={(e) => setNewNews({ ...newNews, content: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs resize-none"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs resize-none"
                     />
 
                     <button
                       type="submit"
-                      className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs"
+                      className="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs"
                     >
                       Publish Post To Website
                     </button>
@@ -2300,12 +2268,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 <div className="lg:col-span-7 space-y-3 max-h-[500px] overflow-y-auto pr-1">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold uppercase text-slate-400">Current Posts ({news.length})</h4>
+                    <h4 className="text-xs font-bold uppercase text-slate-600 dark:text-slate-500 dark:text-slate-400">Current Posts ({news.length})</h4>
                     {news.length > 0 && (
                       <button
                         type="button"
                         onClick={handleClearAllNews}
-                        className="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white text-[11px] font-bold transition-colors flex items-center space-x-1 border border-red-500/30"
+                        className="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-slate-900 dark:text-white text-[11px] font-bold transition-colors flex items-center space-x-1 border border-red-500/30"
                       >
                         <Trash2 className="w-3 h-3" />
                         <span>Remove All News Posts</span>
@@ -2313,16 +2281,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     )}
                   </div>
                   {news.map((item) => (
-                    <div key={item.id} className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                    <div key={item.id} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 flex items-center justify-between">
                       <div className="min-w-0 flex-1 pr-4 space-y-1">
-                        <span className="text-[10px] uppercase font-bold text-emerald-400">{item.category} • {item.date}</span>
-                        <h5 className="text-sm font-bold truncate text-white">{item.title}</h5>
-                        <p className="text-xs text-slate-400 truncate">{item.excerpt}</p>
+                        <span className="text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-400">{item.category} • {item.date}</span>
+                        <h5 className="text-sm font-bold truncate text-slate-900 dark:text-white">{item.title}</h5>
+                        <p className="text-xs text-slate-600 dark:text-slate-500 dark:text-slate-400 truncate">{item.excerpt}</p>
                       </div>
 
                       <button
                         onClick={() => handleDeleteNews(item.id)}
-                        className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white transition-colors"
+                        className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-slate-900 dark:text-white transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -2335,8 +2303,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             {/* TAB: JOBS */}
             {activeTab === 'jobs' && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <div className="lg:col-span-5 p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
-                  <h4 className="font-bold text-sm text-emerald-400 uppercase tracking-wider flex items-center space-x-2">
+                <div className="lg:col-span-5 p-6 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 space-y-4">
+                  <h4 className="font-bold text-sm text-emerald-700 dark:text-emerald-400 uppercase tracking-wider flex items-center space-x-2">
                     <Plus className="w-4 h-4" />
                     <span>Publish Career Opportunity</span>
                   </h4>
@@ -2348,7 +2316,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Job Title (e.g. Physics Teacher)"
                       value={newJob.title}
                       onChange={(e) => setNewJob({ ...newJob, title: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                     />
 
                     <input
@@ -2357,7 +2325,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Department"
                       value={newJob.department}
                       onChange={(e) => setNewJob({ ...newJob, department: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                     />
 
                     <input
@@ -2366,7 +2334,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Deadline (e.g. March 30, 2026)"
                       value={newJob.deadline}
                       onChange={(e) => setNewJob({ ...newJob, deadline: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                     />
 
                     <textarea
@@ -2375,7 +2343,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Job Description"
                       value={newJob.description}
                       onChange={(e) => setNewJob({ ...newJob, description: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs resize-none"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs resize-none"
                     />
 
                     <textarea
@@ -2384,12 +2352,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Key Requirements (one per line)"
                       value={newJob.requirementsStr}
                       onChange={(e) => setNewJob({ ...newJob, requirementsStr: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs resize-none"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs resize-none"
                     />
 
                     <button
                       type="submit"
-                      className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs"
+                      className="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs"
                     >
                       Post Vacancy
                     </button>
@@ -2398,12 +2366,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 <div className="lg:col-span-7 space-y-3 max-h-[500px] overflow-y-auto pr-1">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold uppercase text-slate-400">Open Vacancies ({jobs.length})</h4>
+                    <h4 className="text-xs font-bold uppercase text-slate-600 dark:text-slate-500 dark:text-slate-400">Open Vacancies ({jobs.length})</h4>
                     {jobs.length > 0 && (
                       <button
                         type="button"
                         onClick={handleClearAllJobs}
-                        className="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white text-[11px] font-bold transition-colors flex items-center space-x-1 border border-red-500/30"
+                        className="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-slate-900 dark:text-white text-[11px] font-bold transition-colors flex items-center space-x-1 border border-red-500/30"
                       >
                         <Trash2 className="w-3 h-3" />
                         <span>Remove All Job Postings</span>
@@ -2411,23 +2379,23 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     )}
                   </div>
                   {jobs.map((job) => (
-                    <div key={job.id} className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+                    <div key={job.id} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] uppercase font-bold text-emerald-400">{job.department}</span>
+                        <span className="text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-400">{job.department}</span>
                         <div className="flex items-center space-x-2">
                           <span className="text-xs text-red-400 font-bold">Deadline: {job.deadline}</span>
                           <button
                             type="button"
                             onClick={() => handleDeleteJob(job.id)}
-                            className="p-1 rounded bg-red-600/80 hover:bg-red-600 text-white ml-2"
+                            className="p-1 rounded bg-red-600/80 hover:bg-red-600 text-slate-900 dark:text-white ml-2"
                             title="Delete Career Vacancy"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
-                      <h5 className="text-sm font-bold text-white">{job.title}</h5>
-                      <p className="text-xs text-slate-400 line-clamp-1">{job.description}</p>
+                      <h5 className="text-sm font-bold text-slate-900 dark:text-white">{job.title}</h5>
+                      <p className="text-xs text-slate-600 dark:text-slate-500 dark:text-slate-400 line-clamp-1">{job.description}</p>
                     </div>
                   ))}
                 </div>
@@ -2437,20 +2405,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             {/* TAB: MESSAGES */}
             {activeTab === 'messages' && (
               <div className="space-y-4 max-h-[500px] overflow-y-auto">
-                <h4 className="text-xs font-bold uppercase text-slate-400">Incoming Contact Inquiries ({messages.length})</h4>
+                <h4 className="text-xs font-bold uppercase text-slate-600 dark:text-slate-500 dark:text-slate-400">Incoming Contact Inquiries ({messages.length})</h4>
                 {messages.length === 0 ? (
-                  <p className="text-sm text-slate-500">No contact messages received yet.</p>
+                  <p className="text-sm text-slate-600">No contact messages received yet.</p>
                 ) : (
                   messages.map((msg) => (
-                    <div key={msg.id} className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                    <div key={msg.id} className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 space-y-2">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-bold text-emerald-400">{msg.name} ({msg.email} • {msg.phone || 'No Phone'})</span>
+                        <span className="font-bold text-emerald-700 dark:text-emerald-400">{msg.name} ({msg.email} • {msg.phone || 'No Phone'})</span>
                         <div className="flex items-center space-x-2">
-                          <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px]">{msg.subject || 'General'}</span>
+                          <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-500 dark:text-slate-400 text-[10px]">{msg.subject || 'General'}</span>
                           <button
                             type="button"
                             onClick={() => handleDeleteMessage(msg.id)}
-                            className="p-1 rounded bg-red-600/80 hover:bg-red-600 text-white ml-2"
+                            className="p-1 rounded bg-red-600/80 hover:bg-red-600 text-slate-900 dark:text-white ml-2"
                             title="Delete Contact Inquiry"
                           >
                             <Trash2 className="w-3.5 h-3.5" />

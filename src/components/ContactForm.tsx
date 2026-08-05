@@ -59,12 +59,12 @@ export const ContactForm: React.FC = () => {
   };
 
   return (
-    <section id="contact" className="py-20 bg-white dark:bg-slate-950 text-slate-900 dark:text-white transition-colors relative">
+    <section id="contact" className="py-20 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
             <Mail className="w-4 h-4" />
             <span>Connect With Us</span>
           </div>
@@ -82,25 +82,25 @@ export const ContactForm: React.FC = () => {
           {/* Left Column: Contact Details Cards */}
           <div className="lg:col-span-5 space-y-6">
             
-            <div className="p-8 rounded-3xl bg-slate-900 text-white border border-emerald-500/30 shadow-2xl space-y-6">
-              <h3 className="text-2xl font-extrabold text-white">Contact Information</h3>
-              <p className="text-sm text-slate-300 font-light">
+            <div className="p-8 rounded-3xl bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-200 dark:border-emerald-500/30 shadow-md space-y-6">
+              <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white">Contact Information</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300 font-light">
                 Feel free to contact us via phone, email, or visit our administration office during official hours.
               </p>
 
-              <div className="space-y-4 text-sm text-slate-200">
+              <div className="space-y-4 text-sm text-slate-700 dark:text-slate-200">
                 <div className="flex items-start space-x-3.5">
-                  <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0">
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="font-bold text-white">Physical Location</p>
-                    <p className="text-xs text-slate-300">Gatura Town, Gatanga Sub-County, P.O. Box 30-01013 Gatura, Murang'a County, Kenya</p>
+                    <p className="font-bold text-slate-900 dark:text-white">Physical Location</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-300">Gatura Town, Gatanga Sub-County, P.O. Box 30-01013 Gatura, Murang'a County, Kenya</p>
                     <a 
                       href="https://maps.app.goo.gl/oq7iHDB4f6vS2P868" 
                       target="_blank" 
                       rel="noopener noreferrer" 
-                      className="inline-flex items-center space-x-1.5 text-xs text-emerald-400 font-bold hover:underline mt-1"
+                      className="inline-flex items-center space-x-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold hover:underline mt-1"
                     >
                       <span>Open Location in Google Maps</span>
                       <ExternalLink className="w-3 h-3" />
@@ -109,50 +109,50 @@ export const ContactForm: React.FC = () => {
                 </div>
 
                 <div className="flex items-start space-x-3.5">
-                  <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0">
                     <Phone className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="font-bold text-white">Phone Contacts</p>
-                    <p className="text-xs text-slate-300">+254 (0) 793328863</p>
+                    <p className="font-bold text-slate-900 dark:text-white">Phone Contacts</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-300">+254 (0) 793328863</p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-3.5">
-                  <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0">
                     <Mail className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="font-bold text-white">Official Email</p>
-                    <p className="text-xs text-slate-300">gaturagirls@gmail.com</p>
+                    <p className="font-bold text-slate-900 dark:text-white">Official Email</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-300">gaturagirls@gmail.com</p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-3.5">
-                  <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0">
                     <Clock className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="font-bold text-white">Office Operating Hours</p>
-                    <p className="text-xs text-slate-300">Monday – Friday: 8:00 AM – 5:00 PM (EAT)</p>
+                    <p className="font-bold text-slate-900 dark:text-white">Office Operating Hours</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-300">Monday – Friday: 8:00 AM – 5:00 PM (EAT)</p>
                   </div>
                 </div>
               </div>
 
               {/* Social Channels */}
-              <div className="pt-6 border-t border-slate-800 space-y-3">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Social Media Channels</p>
+              <div className="pt-6 border-t border-slate-300 dark:border-slate-800 space-y-3">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-500 dark:text-slate-400">Social Media Channels</p>
                 <div className="flex space-x-3">
-                  <a href="#" className="p-3 rounded-xl bg-slate-800 hover:bg-emerald-500 text-white transition-colors">
+                  <a href="#" className="p-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-emerald-500 text-slate-700 dark:text-white transition-colors border border-slate-200 dark:border-transparent">
                     <Facebook className="w-4 h-4" />
                   </a>
-                  <a href="#" className="p-3 rounded-xl bg-slate-800 hover:bg-emerald-500 text-white transition-colors">
+                  <a href="#" className="p-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-emerald-500 text-slate-700 dark:text-white transition-colors border border-slate-200 dark:border-transparent">
                     <Twitter className="w-4 h-4" />
                   </a>
-                  <a href="#" className="p-3 rounded-xl bg-slate-800 hover:bg-emerald-500 text-white transition-colors">
+                  <a href="#" className="p-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-emerald-500 text-slate-700 dark:text-white transition-colors border border-slate-200 dark:border-transparent">
                     <Instagram className="w-4 h-4" />
                   </a>
-                  <a href="#" className="p-3 rounded-xl bg-slate-800 hover:bg-emerald-500 text-white transition-colors">
+                  <a href="#" className="p-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-emerald-500 text-slate-700 dark:text-white transition-colors border border-slate-200 dark:border-transparent">
                     <Youtube className="w-4 h-4" />
                   </a>
                 </div>
@@ -164,16 +164,16 @@ export const ContactForm: React.FC = () => {
 
           {/* Right Column: Interactive Form */}
           <div className="lg:col-span-7">
-            <div className="p-8 sm:p-10 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
+            <div className="p-8 sm:p-10 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 shadow-xl space-y-6">
               
               <div className="space-y-1">
                 <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white">Send Us a Direct Message</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Your message will be routed directly to the principal's administrative office.</p>
+                <p className="text-xs text-slate-600 dark:text-slate-500 dark:text-slate-400">Your message will be routed directly to the principal's administrative office.</p>
               </div>
 
               {submitted ? (
-                <div className="p-8 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-4 animate-fade-in">
-                  <div className="w-16 h-16 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/30">
+                <div className="p-8 rounded-2xl bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/30 text-center space-y-4 animate-fade-in">
+                  <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-sm shadow-emerald-500/30">
                     <CheckCircle2 className="w-8 h-8" />
                   </div>
                   <h4 className="text-xl font-extrabold text-slate-900 dark:text-white">Message Sent Successfully!</h4>
@@ -182,7 +182,7 @@ export const ContactForm: React.FC = () => {
                   </p>
                   <button
                     onClick={() => setSubmitted(false)}
-                    className="px-6 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs"
+                    className="px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs"
                   >
                     Send Another Message
                   </button>
@@ -198,7 +198,7 @@ export const ContactForm: React.FC = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Full Name *</label>
+                      <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Full Name *</label>
                       <input
                         type="text"
                         name="name"
@@ -206,12 +206,12 @@ export const ContactForm: React.FC = () => {
                         value={formData.name}
                         onChange={handleChange}
                         placeholder="e.g. Jane Wanjiku"
-                        className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500"
+                        className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Email Address *</label>
+                      <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Email Address *</label>
                       <input
                         type="email"
                         name="email"
@@ -219,31 +219,31 @@ export const ContactForm: React.FC = () => {
                         value={formData.email}
                         onChange={handleChange}
                         placeholder="e.g. jane@example.com"
-                        className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500"
+                        className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Phone Number</label>
+                      <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Phone Number</label>
                       <input
                         type="tel"
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
                         placeholder="+254 700 000 000"
-                        className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500"
+                        className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Subject Category</label>
+                      <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Subject Category</label>
                       <select
                         name="subject"
                         value={formData.subject}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500"
+                        className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500"
                       >
                         <option value="">Select Category</option>
                         <option value="Admission Inquiry">Admission Inquiry (8-4-4 / CBC)</option>
@@ -255,7 +255,7 @@ export const ContactForm: React.FC = () => {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Message Content *</label>
+                    <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Message Content *</label>
                     <textarea
                       name="message"
                       rows={5}
@@ -263,14 +263,14 @@ export const ContactForm: React.FC = () => {
                       value={formData.message}
                       onChange={handleChange}
                       placeholder="Write your detailed inquiry or message here..."
-                      className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500 resize-none"
+                      className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500 resize-none"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full flex items-center justify-center space-x-2 py-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-sm shadow-xl shadow-emerald-500/20 transition-all"
+                    className="w-full flex items-center justify-center space-x-2 py-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-sm shadow-xl shadow-emerald-500/20 transition-all"
                   >
                     <Send className="w-4 h-4" />
                     <span>{submitting ? 'Submitting Message...' : 'Submit Message'}</span>

@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { 
-  getFirestore, 
+  getFirestore, initializeFirestore, persistentLocalCache, 
   collection, 
   getDocs, 
   addDoc, 
@@ -11,7 +11,8 @@ import {
   query, 
   orderBy, 
   onSnapshot,
-  serverTimestamp
+  serverTimestamp,
+  setLogLevel
 } from 'firebase/firestore';
 import { 
   getAuth, 
@@ -23,8 +24,16 @@ import {
 import config from '../firebase-applet-config.json';
 
 const app = initializeApp(config);
-export const db = getFirestore(app, config.firestoreDatabaseId || undefined);
+
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache()
+}, config.firestoreDatabaseId || undefined);
+
 export const auth = getAuth(app);
+
+// Suppress internal Firebase SDK connection errors (e.g. Quota Exceeded)
+// so they don't trigger the error overlay, allowing our fallback UI to handle it cleanly.
+setLogLevel('silent');
 
 export * from './services/firebaseService';
 

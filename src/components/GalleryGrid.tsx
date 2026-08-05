@@ -1,20 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { GalleryItem } from '../types';
-import { Image as ImageIcon, Maximize2, X, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { Image as ImageIcon, Maximize2, X, ChevronLeft, ChevronRight, Filter, ChevronDown } from 'lucide-react';
 
 interface GalleryGridProps {
   gallery: GalleryItem[];
 }
 
+const ITEMS_PER_PAGE = 6;
+
 export const GalleryGrid: React.FC<GalleryGridProps> = ({ gallery }) => {
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [visibleCount, setVisibleCount] = useState<number>(ITEMS_PER_PAGE);
 
   const categories = ['All', 'Academics', 'Facilities', 'Sports', 'Events', 'Student Life'];
 
-  const filteredItems = activeCategory === 'All'
-    ? gallery
-    : gallery.filter(item => item.category === activeCategory);
+  const filteredItems = useMemo(() => {
+    return activeCategory === 'All'
+      ? gallery
+      : (gallery || []).filter(item => item.category === activeCategory);
+  }, [gallery, activeCategory]);
+
+  const displayedItems = filteredItems.slice(0, visibleCount);
+
+  const handleCategoryChange = (category: string) => {
+    setActiveCategory(category);
+    setVisibleCount(ITEMS_PER_PAGE); // reset visible count on category change
+  };
+
+  const loadMore = () => {
+    setVisibleCount(prev => prev + ITEMS_PER_PAGE);
+  };
 
   const openLightbox = (index: number) => {
     setLightboxIndex(index);
@@ -26,45 +42,52 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ gallery }) => {
 
   const nextLightbox = () => {
     if (lightboxIndex !== null) {
-      setLightboxIndex((lightboxIndex + 1) % filteredItems.length);
+      setLightboxIndex((lightboxIndex + 1) % displayedItems.length);
     }
   };
 
   const prevLightbox = () => {
     if (lightboxIndex !== null) {
-      setLightboxIndex((lightboxIndex - 1 + filteredItems.length) % filteredItems.length);
+      setLightboxIndex((lightboxIndex - 1 + displayedItems.length) % displayedItems.length);
     }
   };
 
   return (
-    <section id="gallery" className="py-20 bg-slate-900 text-white relative overflow-hidden">
+    <section id="gallery" className="py-20 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white relative overflow-hidden transition-colors">
       
+      {/* Background Decorative */}
+      <div className="absolute top-1/2 left-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -translate-x-1/2" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none translate-x-1/3" />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12 space-y-4">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+        <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
             <ImageIcon className="w-4 h-4" />
-            <span>Visual Tour & Campus Gallery</span>
+            <span>Campus Life</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
-            Life at St. Teresa Gatura Girls
+          <h2 className="text-3xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white">
+            Photo <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300">Gallery</span>
           </h2>
-          <p className="text-slate-300 text-base sm:text-lg font-light">
-            Explore our state-of-the-art facilities, academic laboratories, athletic triumphs, and vibrant school events.
+          <p className="text-slate-600 dark:text-slate-300 text-lg leading-relaxed">
+            Experience the vibrant life, state-of-the-art facilities, and defining moments at St. Teresa Gatura Girls.
           </p>
         </div>
 
-        {/* Category Filters */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+        {/* Filter Categories */}
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-10">
+          <div className="hidden sm:flex items-center mr-2 text-slate-500 dark:text-slate-400 dark:text-slate-600">
+            <Filter className="w-5 h-5" />
+          </div>
           {categories.map((cat) => (
             <button
               key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              onClick={() => handleCategoryChange(cat)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 shadow-sm ${
                 activeCategory === cat
-                  ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/30'
-                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700'
+                  ? 'bg-emerald-600 text-white shadow-emerald-600/30 dark:shadow-emerald-900/50 scale-105'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 hover:border-emerald-500/40'
               }`}
             >
               {cat}
@@ -72,103 +95,107 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ gallery }) => {
           ))}
         </div>
 
-        {/* Gallery Masonry Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredItems.map((item, idx) => (
-            <div
-              key={item.id}
-              onClick={() => openLightbox(idx)}
-              className="group relative h-72 rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 cursor-pointer shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/50 hover:shadow-2xl hover:shadow-emerald-950/50"
+        {/* Gallery Grid */}
+        {displayedItems.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {displayedItems.map((item, idx) => (
+              <div 
+                key={item.id}
+                className="group relative rounded-2xl overflow-hidden aspect-[4/3] cursor-pointer shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 bg-slate-200 dark:bg-slate-800"
+                onClick={() => openLightbox(idx)}
+              >
+                <img loading="lazy" 
+                  src={item.imageUrl} 
+                  alt={item.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                  <span className="inline-block px-3 py-1 rounded-full bg-emerald-500/90 text-slate-950 text-[10px] font-bold uppercase tracking-wider mb-3 w-max">
+                    {item.category}
+                  </span>
+                  <h3 className="text-white font-bold text-xl mb-1 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                    {item.title}
+                  </h3>
+                  <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center absolute top-4 right-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100 hover:bg-emerald-500 hover:text-slate-950">
+                    <Maximize2 className="w-4 h-4" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20 bg-white dark:bg-slate-800/50 rounded-3xl border border-slate-200 dark:border-slate-700 border-dashed">
+            <ImageIcon className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">No photos found</h3>
+            <p className="text-slate-600 dark:text-slate-500 dark:text-slate-400 text-sm">No photos available in the "{activeCategory}" category.</p>
+          </div>
+        )}
+
+        {/* Load More Button */}
+        {visibleCount < filteredItems.length && (
+          <div className="mt-12 text-center">
+            <button
+              onClick={loadMore}
+              className="inline-flex items-center space-x-2 px-8 py-3 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm shadow-sm shadow-emerald-500/20 hover:shadow-xl transition-all hover:scale-105"
             >
-              <img
-                src={item.imageUrl}
-                alt={item.title}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-              
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-80 group-hover:opacity-95 transition-opacity" />
-
-              {/* Top Category Badge */}
-              <div className="absolute top-4 left-4">
-                <span className="px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur-md text-emerald-400 text-[11px] font-bold border border-emerald-500/30">
-                  {item.category}
-                </span>
-              </div>
-
-              {/* Hover Zoom Icon */}
-              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-full bg-emerald-500 text-slate-950 shadow-lg">
-                <Maximize2 className="w-4 h-4" />
-              </div>
-
-              {/* Bottom Caption & Title */}
-              <div className="absolute bottom-4 left-4 right-4 space-y-1">
-                <h3 className="text-base font-bold text-white group-hover:text-emerald-300 transition-colors">
-                  {item.title}
-                </h3>
-                <p className="text-xs text-slate-300 line-clamp-1 font-light">
-                  {item.caption}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+              <span>Load More</span>
+              <ChevronDown className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
       </div>
 
       {/* Lightbox Modal */}
-      {lightboxIndex !== null && filteredItems[lightboxIndex] && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-xl animate-fade-in">
+      {lightboxIndex !== null && displayedItems[lightboxIndex] && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/95 backdrop-blur-xl">
+          <div className="absolute inset-0" onClick={closeLightbox} />
           
-          {/* Close button */}
-          <button
+          <button 
+            className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-red-500 text-white transition-colors z-10"
             onClick={closeLightbox}
-            className="absolute top-6 right-6 p-3 rounded-full bg-slate-900 text-white border border-slate-700 hover:bg-emerald-500 hover:text-slate-950 transition-colors z-50"
           >
             <X className="w-6 h-6" />
           </button>
 
-          {/* Prev / Next Buttons */}
-          <button
-            onClick={prevLightbox}
-            className="absolute left-6 top-1/2 -translate-y-1/2 p-3 rounded-full bg-slate-900/80 text-white border border-slate-700 hover:bg-emerald-500 hover:text-slate-950 transition-colors z-50"
+          <button 
+            className="absolute left-4 sm:left-10 p-3 rounded-full bg-white/10 hover:bg-emerald-500 text-white transition-colors z-10"
+            onClick={(e) => { e.stopPropagation(); prevLightbox(); }}
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
-          
-          <button
-            onClick={nextLightbox}
-            className="absolute right-6 top-1/2 -translate-y-1/2 p-3 rounded-full bg-slate-900/80 text-white border border-slate-700 hover:bg-emerald-500 hover:text-slate-950 transition-colors z-50"
+
+          <button 
+            className="absolute right-4 sm:right-10 p-3 rounded-full bg-white/10 hover:bg-emerald-500 text-white transition-colors z-10"
+            onClick={(e) => { e.stopPropagation(); nextLightbox(); }}
           >
             <ChevronRight className="w-6 h-6" />
           </button>
 
-          {/* Lightbox Content Box */}
-          <div className="max-w-4xl w-full space-y-4 text-center">
-            <div className="relative max-h-[75vh] overflow-hidden rounded-2xl border border-emerald-500/30 shadow-2xl bg-black">
-              <img
-                src={filteredItems[lightboxIndex].imageUrl}
-                alt={filteredItems[lightboxIndex].title}
-                className="max-h-[75vh] w-auto mx-auto object-contain"
-              />
-            </div>
-            
-            <div className="space-y-1 bg-slate-900/80 p-4 rounded-xl border border-slate-800">
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                {filteredItems[lightboxIndex].category}
+          <div className="relative z-10 max-w-5xl w-full px-4 sm:px-12 pointer-events-none flex flex-col items-center">
+            <img loading="lazy" 
+              src={displayedItems[lightboxIndex].imageUrl} 
+              alt={displayedItems[lightboxIndex].title}
+              className="max-h-[75vh] w-auto object-contain rounded-lg shadow-md pointer-events-auto"
+            />
+            <div className="mt-6 text-center pointer-events-auto">
+              <span className="inline-block px-3 py-1 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-bold uppercase tracking-wider mb-3">
+                {displayedItems[lightboxIndex].category}
               </span>
-              <h3 className="text-xl font-bold text-white">
-                {filteredItems[lightboxIndex].title}
+              <h3 className="text-2xl font-bold text-white mb-2">
+                {displayedItems[lightboxIndex].title}
               </h3>
-              <p className="text-sm text-slate-300 font-light">
-                {filteredItems[lightboxIndex].caption}
-              </p>
+              {displayedItems[lightboxIndex].caption && (
+                <p className="text-slate-300 max-w-2xl mx-auto">
+                  {displayedItems[lightboxIndex].caption}
+                </p>
+              )}
             </div>
           </div>
-
         </div>
       )}
-
     </section>
   );
 };

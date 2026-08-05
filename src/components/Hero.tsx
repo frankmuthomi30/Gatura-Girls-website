@@ -108,9 +108,9 @@ export const Hero: React.FC<HeroProps> = ({ onExplorePrograms, onOpenAdmissions,
   };
 
   return (
-    <section id="hero" className="relative min-h-[90vh] pt-28 pb-16 flex items-center justify-center overflow-hidden bg-slate-950 text-white">
+    <section id="hero" className="relative min-h-[90vh] pt-28 pb-16 flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white">
       {/* Parallax / Ambient Background Glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/60 via-slate-950 to-emerald-900/40 z-0" />
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/60 via-slate-50 to-emerald-50/40 dark:from-emerald-950/60 dark:via-slate-950 dark:to-emerald-900/40 z-0" />
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none animate-pulse" />
       <div className="absolute bottom-10 right-10 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -125,24 +125,24 @@ export const Hero: React.FC<HeroProps> = ({ onExplorePrograms, onOpenAdmissions,
             
             {/* Top Tag & Live Weather Pills */}
             <div className="flex flex-wrap items-center gap-3">
-              <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 backdrop-blur-md">
-                <Sparkles className="w-4 h-4 text-emerald-400 animate-spin-slow" />
-                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-300">
+              <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-emerald-100/90 dark:bg-emerald-500/10 border border-emerald-300 dark:border-slate-200 dark:border-emerald-500/30 backdrop-blur-md">
+                <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400 animate-spin-slow" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
                   St. Teresa Gatura Girls Senior School • Murang'a County
                 </span>
               </div>
 
               {/* Real Live Weather Update Badge */}
-              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-emerald-500/40 backdrop-blur-md text-xs">
+              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 border border-emerald-500/40 backdrop-blur-md text-xs">
                 <CloudSun className="w-4 h-4 text-amber-300 animate-pulse" />
-                <span className="font-extrabold text-white">{heroWeather.temp}°C</span>
-                <span className="text-emerald-300 font-semibold">{heroWeather.cond}</span>
-                <span className="text-slate-400 hidden sm:inline">| Gatura Live</span>
+                <span className="font-extrabold text-slate-900 dark:text-white">{heroWeather.temp}°C</span>
+                <span className="text-emerald-700 dark:text-emerald-300 font-semibold">{heroWeather.cond}</span>
+                <span className="text-slate-600 dark:text-slate-500 dark:text-slate-400 hidden sm:inline">| Gatura Live</span>
                 <button 
                   onClick={fetchGaturaHeroWeather} 
                   title="Refresh weather" 
                   disabled={heroWeather.loading}
-                  className="p-1 text-slate-400 hover:text-emerald-400 transition-colors"
+                  className="p-1 text-slate-600 dark:text-slate-500 dark:text-slate-400 hover:text-emerald-700 dark:text-emerald-400 transition-colors"
                 >
                   <RefreshCw className={`w-3 h-3 ${heroWeather.loading ? 'animate-spin' : ''}`} />
                 </button>
@@ -150,27 +150,27 @@ export const Hero: React.FC<HeroProps> = ({ onExplorePrograms, onOpenAdmissions,
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.15]">
-              Empowering Young Girls For <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-200">Global Leadership</span>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.15]">
+              Empowering Young Girls For <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 dark:from-emerald-400 dark:via-teal-300 dark:to-emerald-200">Global Leadership</span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-lg sm:text-xl text-slate-300 font-light max-w-2xl leading-relaxed">
-              Offering both the <strong className="text-emerald-400 font-semibold">8-4-4 System</strong> and the <strong className="text-emerald-400 font-semibold">Competency-Based Curriculum (CBC)</strong> Senior Secondary Pathways (Grade 10–12) with state-of-the-art STEM, Humanities, and Creative Arts facilities.
+            <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 font-light max-w-2xl leading-relaxed">
+              Offering both the <strong className="text-emerald-700 dark:text-emerald-400 font-semibold">8-4-4 System</strong> and the <strong className="text-emerald-700 dark:text-emerald-400 font-semibold">Competency-Based Curriculum (CBC)</strong> Senior Secondary Pathways (Grade 10–12) with state-of-the-art STEM, Humanities, and Creative Arts facilities.
             </p>
 
             {/* Feature Pills */}
             <div className="flex flex-wrap gap-3 pt-2">
-              <div className="flex items-center space-x-2 text-sm text-slate-200 bg-white/5 border border-white/10 px-3.5 py-1.5 rounded-lg backdrop-blur-sm">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <div className="flex items-center space-x-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 px-3.5 py-1.5 rounded-lg backdrop-blur-sm shadow-sm">
+                <CheckCircle2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                 <span>STEM & SOCIAL SCIENCES Pathways</span>
               </div>
-              <div className="flex items-center space-x-2 text-sm text-slate-200 bg-white/5 border border-white/10 px-3.5 py-1.5 rounded-lg backdrop-blur-sm">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <div className="flex items-center space-x-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 px-3.5 py-1.5 rounded-lg backdrop-blur-sm shadow-sm">
+                <CheckCircle2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                 <span>100% Transition Rate</span>
               </div>
-              <div className="flex items-center space-x-2 text-sm text-slate-200 bg-white/5 border border-white/10 px-3.5 py-1.5 rounded-lg backdrop-blur-sm">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <div className="flex items-center space-x-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 px-3.5 py-1.5 rounded-lg backdrop-blur-sm shadow-sm">
+                <CheckCircle2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                 <span>Christian Character & Discipline</span>
               </div>
             </div>
@@ -179,7 +179,7 @@ export const Hero: React.FC<HeroProps> = ({ onExplorePrograms, onOpenAdmissions,
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
               <button
                 onClick={onOpenAdmissions}
-                className="flex items-center justify-center space-x-3 px-7 py-4 rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-base shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:scale-[1.02] transition-all"
+                className="flex items-center justify-center space-x-3 px-7 py-4 rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-base shadow-xl shadow-emerald-500/30 hover:shadow-md hover:scale-[1.02] transition-all"
               >
                 <span>2027 Admissions Open</span>
                 <ArrowRight className="w-5 h-5" />
@@ -187,9 +187,9 @@ export const Hero: React.FC<HeroProps> = ({ onExplorePrograms, onOpenAdmissions,
 
               <button
                 onClick={onExplorePrograms}
-                className="flex items-center justify-center space-x-2 px-6 py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-base border border-white/20 backdrop-blur-md transition-all hover:border-emerald-400/50"
+                className="flex items-center justify-center space-x-2 px-6 py-4 rounded-xl bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-900 dark:text-white font-semibold text-base border border-slate-300 dark:border-white/20 backdrop-blur-md transition-all hover:border-emerald-400/50"
               >
-                <BookOpen className="w-5 h-5 text-emerald-400" />
+                <BookOpen className="w-5 h-5 text-emerald-700 dark:text-emerald-400" />
                 <span>Explore Academic Pathways</span>
               </button>
             </div>
@@ -201,13 +201,13 @@ export const Hero: React.FC<HeroProps> = ({ onExplorePrograms, onOpenAdmissions,
             <div className="relative mx-auto max-w-md lg:max-w-none">
               
               {/* Glass Card Container */}
-              <div className="relative rounded-3xl p-3 bg-white/10 dark:bg-slate-900/60 backdrop-blur-xl border border-white/20 shadow-2xl shadow-emerald-950/50 overflow-hidden group">
+              <div className="relative rounded-3xl p-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-300 dark:border-white/20 shadow-md shadow-emerald-950/50 overflow-hidden group">
                 
                 {/* Image Holder */}
-                <div className="relative h-96 sm:h-[420px] rounded-2xl overflow-hidden bg-slate-900">
+                <div className="relative h-96 sm:h-[420px] rounded-2xl overflow-hidden bg-slate-200 dark:bg-slate-900">
                   {activeSlides.length > 0 ? (
                     <>
-                      <img 
+                      <img loading="lazy" 
                         src={activeSlides[currentSlide]?.image} 
                         alt={activeSlides[currentSlide]?.title || 'St. Teresa Gatura Girls'}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -215,27 +215,27 @@ export const Hero: React.FC<HeroProps> = ({ onExplorePrograms, onOpenAdmissions,
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
                       
                       {/* Category Tag on Image */}
-                      <div className="absolute top-4 left-4 bg-emerald-500 text-slate-950 text-xs font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg">
+                      <div className="absolute top-4 left-4 bg-emerald-600 text-white text-xs font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-sm">
                         {activeSlides[currentSlide]?.tag || 'Senior School'}
                       </div>
 
                       {/* Glassmorphic Overlay Box at Bottom of Slide */}
-                      <div className="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-slate-900/80 backdrop-blur-md border border-white/20 text-white space-y-1.5">
-                        <h3 className="font-bold text-lg text-white">
+                      <div className="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-white/20 text-slate-900 dark:text-white space-y-1.5">
+                        <h3 className="font-bold text-lg text-slate-900 dark:text-white">
                           {activeSlides[currentSlide]?.title}
                         </h3>
-                        <p className="text-xs text-slate-300 line-clamp-2">
+                        <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2">
                           {activeSlides[currentSlide]?.subtitle}
                         </p>
                       </div>
                     </>
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center space-y-3 bg-slate-900">
-                      <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                    <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center space-y-3 bg-slate-200 dark:bg-slate-900">
+                      <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
                         <Award className="w-8 h-8" />
                       </div>
-                      <h3 className="font-bold text-xl text-white">St. Teresa Gatura Girls</h3>
-                      <p className="text-xs text-slate-400 max-w-xs">
+                      <h3 className="font-bold text-xl text-slate-900 dark:text-white">St. Teresa Gatura Girls</h3>
+                      <p className="text-xs text-slate-600 dark:text-slate-500 dark:text-slate-400 max-w-xs">
                         Empowering young women through academic excellence, moral integrity, and leadership.
                       </p>
                     </div>
@@ -247,13 +247,13 @@ export const Hero: React.FC<HeroProps> = ({ onExplorePrograms, onOpenAdmissions,
                   <>
                     <button 
                       onClick={prevSlide}
-                      className="absolute left-6 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-900/70 text-white border border-white/20 hover:bg-emerald-500 transition-colors"
+                      className="absolute left-6 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/70 dark:bg-slate-900/70 text-slate-900 dark:text-white border border-slate-300 dark:border-white/20 hover:bg-emerald-500 transition-colors"
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
                     <button 
                       onClick={nextSlide}
-                      className="absolute right-6 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-900/70 text-white border border-white/20 hover:bg-emerald-500 transition-colors"
+                      className="absolute right-6 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/70 dark:bg-slate-900/70 text-slate-900 dark:text-white border border-slate-300 dark:border-white/20 hover:bg-emerald-500 transition-colors"
                     >
                       <ChevronRight className="w-5 h-5" />
                     </button>
@@ -278,13 +278,13 @@ export const Hero: React.FC<HeroProps> = ({ onExplorePrograms, onOpenAdmissions,
               </div>
 
               {/* Floating Badge 1 */}
-              <div className="absolute -bottom-5 -left-5 bg-slate-900/90 border border-emerald-500/40 backdrop-blur-xl p-3.5 rounded-2xl shadow-xl hidden sm:flex items-center space-x-3 text-white">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+              <div className="absolute -bottom-5 -left-5 bg-white/90 dark:bg-slate-900/90 border border-emerald-500/40 backdrop-blur-xl p-3.5 rounded-2xl shadow-xl hidden sm:flex items-center space-x-3 text-slate-900 dark:text-white">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
                   <Award className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-400 font-medium">Exam Performance</p>
-                  <p className="text-sm font-bold text-white"> Girls Senior School</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-500 dark:text-slate-400 font-medium">Exam Performance</p>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white"> Girls Senior School</p>
                 </div>
               </div>
 

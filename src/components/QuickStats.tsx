@@ -34,7 +34,7 @@ export const QuickStats: React.FC = () => {
   ];
 
   return (
-    <section className="py-12 bg-slate-50 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800 transition-colors">
+    <section className="py-12 bg-white dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, idx) => {
@@ -42,7 +42,7 @@ export const QuickStats: React.FC = () => {
             return (
               <div 
                 key={idx}
-                className="relative p-6 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 shadow-lg shadow-slate-200/50 dark:shadow-none backdrop-blur-md hover:border-emerald-500/40 hover:scale-[1.02] transition-all group"
+                className="relative p-6 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 shadow-sm dark:shadow-none backdrop-blur-md hover:border-emerald-500/40 hover:scale-[1.02] transition-all group"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} text-white flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-110 transition-transform`}>
@@ -59,7 +59,7 @@ export const QuickStats: React.FC = () => {
                   <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                     {stat.label}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  <p className="text-xs text-slate-600 dark:text-slate-500 dark:text-slate-400 leading-relaxed">
                     {stat.description}
                   </p>
                 </div>
