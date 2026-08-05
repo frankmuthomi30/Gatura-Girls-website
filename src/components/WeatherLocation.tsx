@@ -1,22 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  MapPin, 
-  CloudSun, 
-  Mountain, 
-  Wind, 
-  Droplets, 
-  Compass, 
-  Navigation, 
+import {
+  MapPin,
+  CloudSun,
+  Mountain,
+  Wind,
+  Droplets,
+  Compass,
+  Navigation,
   ExternalLink,
   RefreshCw,
   Sun,
   CloudRain,
   Cloud,
   Moon,
-  Sparkles,
-  Eye
+  Sparkles
 } from 'lucide-react';
 import { WeatherData } from '../types';
+
+// Shared frosted-glass treatment for panels sitting on the plain page background.
+// Uses a real border color (not translucent white) so the edge reads on a white
+// page, and a dark fill one step lighter than the page's own dark background so
+// it doesn't blend into it — translucency + blur alone isn't enough contrast
+// when the panel and the page are the same color.
+const glassPanel =
+  'bg-white/75 dark:bg-slate-800/60 backdrop-blur-2xl backdrop-saturate-150 border border-slate-200 dark:border-white/15 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6),0_8px_24px_-6px_rgba(15,23,42,0.15)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_8px_24px_-6px_rgba(0,0,0,0.5)]';
+
+// Chip treatment for elements nested inside the colorful/dark sky-gradient card,
+// where a light frosted tint stays visible regardless of which weather palette
+// is active behind it.
+const glassChip =
+  'bg-white/60 dark:bg-white/10 backdrop-blur-lg backdrop-saturate-150 border border-white/70 dark:border-white/20';
 
 export const WeatherLocation: React.FC = () => {
   const [weather, setWeather] = useState<WeatherData>({
@@ -35,9 +48,6 @@ export const WeatherLocation: React.FC = () => {
     weatherCode: 2
   });
   const [loadingWeather, setLoadingWeather] = useState(false);
-
-  // Manual simulation mode for user to test effects live ('auto', 'rain', 'sunny', 'night', 'sunset')
-  const [simMode, setSimMode] = useState<'auto' | 'rain' | 'sunny' | 'night' | 'sunset'>('auto');
 
   // Fetch real weather data for Gatura (-0.835, 36.953) using Open-Meteo API
   const fetchGaturaWeather = async () => {
@@ -80,77 +90,32 @@ export const WeatherLocation: React.FC = () => {
     fetchGaturaWeather();
   }, []);
 
-  // Compute active atmospheric state based on real weather or manual sim mode
+  // Compute active atmospheric state from real, live weather data only.
   const activeState = React.useMemo(() => {
-    if (simMode === 'rain') {
-      return {
-        isRaining: true,
-        isSunny: false,
-        isNight: false,
-        isSunset: false,
-        cloudCover: 88,
-        condition: 'Rain Showers & Misty Window',
-        temp: weather.temperature,
-        skyBg: 'from-slate-900 via-cyan-950/80 to-slate-950',
-        glassBorder: 'border-cyan-400/50 shadow-[0_0_30px_rgba(34,211,238,0.25)]'
-      };
-    }
-    if (simMode === 'sunny') {
-      return {
-        isRaining: false,
-        isSunny: true,
-        isNight: false,
-        isSunset: false,
-        cloudCover: 10,
-        condition: 'Bright Radiant Sun',
-        temp: 24,
-        skyBg: 'from-sky-500/30 via-amber-500/20 to-slate-900',
-        glassBorder: 'border-amber-400/60 shadow-[0_0_40px_rgba(251,191,36,0.3)]'
-      };
-    }
-    if (simMode === 'night') {
-      return {
-        isRaining: false,
-        isSunny: false,
-        isNight: true,
-        isSunset: false,
-        cloudCover: 25,
-        condition: 'Clear Night & Glowing Moon',
-        temp: 16,
-        skyBg: 'from-indigo-950 via-slate-950 to-slate-900',
-        glassBorder: 'border-indigo-400/40 shadow-[0_0_35px_rgba(129,140,248,0.25)]'
-      };
-    }
-    if (simMode === 'sunset') {
-      return {
-        isRaining: false,
-        isSunny: false,
-        isNight: false,
-        isSunset: true,
-        cloudCover: 40,
-        condition: 'Aberdare Sunset & Amber Glow',
-        temp: 19,
-        skyBg: 'from-amber-600/35 via-purple-900/35 to-slate-950',
-        glassBorder: 'border-orange-400/50 shadow-[0_0_35px_rgba(251,146,60,0.3)]'
-      };
-    }
-
-    // Auto / Real weather
-    const isRaining = weather.condition.includes('Rain') || (weather.weatherCode !== undefined && weather.weatherCode >= 51);
+    const isRaining =
+      weather.condition.includes('Rain') || (weather.weatherCode !== undefined && weather.weatherCode >= 51);
     const isNight = !weather.isDay;
-    const isSunny = !isNight && !isRaining && (weather.weatherCode === 0 || weather.weatherCode === 1 || weather.condition.includes('Sunny'));
+    const isSunny =
+      !isNight &&
+      !isRaining &&
+      (weather.weatherCode === 0 || weather.weatherCode === 1 || weather.condition.includes('Sunny'));
 
-    let skyBg = 'from-sky-500/20 via-blue-600/15 to-slate-900';
+    // Each sky treatment has a light-mode pass and a dark-mode pass. Previously
+    // these gradients were hardcoded straight to dark slate tones with no `dark:`
+    // split at all, so the card painted the same moody dark wash regardless of
+    // theme — it just happened to look right in dark mode by coincidence, and
+    // ignored the light/dark toggle in light mode.
+    let skyBg = 'from-sky-200/70 via-blue-200/50 to-white dark:from-sky-500/20 dark:via-blue-600/15 dark:to-slate-900';
     let glassBorder = 'border-emerald-500/40 shadow-md';
 
     if (isRaining) {
-      skyBg = 'from-slate-900 via-cyan-950/70 to-slate-950';
+      skyBg = 'from-slate-200 via-cyan-100/70 to-slate-100 dark:from-slate-900 dark:via-cyan-950/70 dark:to-slate-950';
       glassBorder = 'border-cyan-400/50 shadow-[0_0_30px_rgba(34,211,238,0.25)]';
     } else if (isNight) {
-      skyBg = 'from-indigo-950 via-slate-950 to-slate-900';
+      skyBg = 'from-indigo-100 via-slate-100 to-white dark:from-indigo-950 dark:via-slate-950 dark:to-slate-900';
       glassBorder = 'border-indigo-400/40 shadow-[0_0_35px_rgba(129,140,248,0.2)]';
     } else if (isSunny) {
-      skyBg = 'from-sky-500/30 via-amber-500/20 to-slate-900';
+      skyBg = 'from-sky-200 via-amber-100 to-white dark:from-sky-500/30 dark:via-amber-500/20 dark:to-slate-900';
       glassBorder = 'border-amber-400/50 shadow-[0_0_35px_rgba(251,191,36,0.25)]';
     }
 
@@ -158,23 +123,23 @@ export const WeatherLocation: React.FC = () => {
       isRaining,
       isSunny,
       isNight,
-      isSunset: false,
       cloudCover: weather.cloudCover ?? 35,
       condition: weather.condition,
       temp: weather.temperature,
       skyBg,
       glassBorder
     };
-  }, [simMode, weather]);
+  }, [weather]);
 
   return (
     <section id="location" className="py-20 bg-white dark:bg-slate-900 text-slate-900 dark:text-white relative overflow-hidden">
-      
+
       {/* Background Parallax Blur Layer */}
       <div className="absolute top-0 right-1/3 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-12 space-y-4">
           <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
@@ -191,18 +156,18 @@ export const WeatherLocation: React.FC = () => {
 
         {/* Location & Map Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-          
+
           {/* Left Column: Atmospheric Glass Weather Card & Altitude */}
           <div className="lg:col-span-5 space-y-6 flex flex-col justify-between">
-            
+
             {/* ATMOSPHERIC GLASS WINDOW CARD */}
-            <div className={`relative rounded-3xl p-6 sm:p-7 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border ${activeState.glassBorder} transition-all duration-700 overflow-hidden space-y-6 group`}>
-              
+            <div className={`relative rounded-3xl p-6 sm:p-7 bg-white/70 dark:bg-slate-800/55 backdrop-blur-3xl backdrop-saturate-150 border ${activeState.glassBorder} shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] transition-all duration-700 overflow-hidden space-y-6 group`}>
+
               {/* 1. SKY BACKDROP GRADIENT DEPENDING ON TIME / WEATHER */}
               <div className={`absolute inset-0 bg-gradient-to-br ${activeState.skyBg} transition-all duration-1000 pointer-events-none`} />
 
               {/* 2. CLOUD COVER % VISUAL LAYER (CLOUD DENSITY OVERLAY) */}
-              <div 
+              <div
                 className="absolute inset-0 transition-opacity duration-1000 pointer-events-none bg-white/40 dark:bg-slate-950/40"
                 style={{ opacity: (activeState.cloudCover / 100) * 0.75 }}
               >
@@ -240,7 +205,7 @@ export const WeatherLocation: React.FC = () => {
                 <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
                   {/* Frosted condensation mist overlay */}
                   <div className="absolute inset-0 bg-cyan-900/10 backdrop-blur-[1px]" />
-                  
+
                   {/* Animated Raindrops Sliding Down Glass Pane */}
                   {[
                     { left: '8%', delay: '0.1s', size: 'w-1.5 h-4' },
@@ -259,7 +224,7 @@ export const WeatherLocation: React.FC = () => {
                       style={{ left: drop.left, animationDelay: drop.delay }}
                     />
                   ))}
-                  
+
                   {/* Water streaks on glass bottom */}
                   <div className="absolute bottom-0 inset-x-0 h-4 bg-gradient-to-t from-cyan-400/20 to-transparent" />
                 </div>
@@ -267,12 +232,12 @@ export const WeatherLocation: React.FC = () => {
 
               {/* GLASS CARD CONTENT LAYER */}
               <div className="relative z-30 space-y-6">
-                
+
                 {/* Header row */}
-                <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-4">
+                <div className="flex items-center justify-between border-b border-white/50 dark:border-white/15 pb-4">
                   <div className="flex items-center space-x-3">
-                    <div className={`p-3 rounded-2xl border ${
-                      activeState.isSunny 
+                    <div className={`p-3 rounded-2xl border backdrop-blur-md ${
+                      activeState.isSunny
                         ? 'bg-amber-500/20 text-amber-600 dark:text-amber-300 border-amber-400/40'
                         : activeState.isRaining
                         ? 'bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border-cyan-400/40'
@@ -302,7 +267,8 @@ export const WeatherLocation: React.FC = () => {
                   <button
                     onClick={fetchGaturaWeather}
                     disabled={loadingWeather}
-                    className="p-2 rounded-xl bg-white/80 dark:bg-slate-800/80 hover:bg-emerald-500 text-slate-600 dark:text-slate-300 hover:text-slate-950 transition-colors border border-slate-200 dark:border-white/10"
+                    aria-label="Refresh live weather"
+                    className="p-2 rounded-xl bg-white/50 dark:bg-slate-800/60 backdrop-blur-md hover:bg-emerald-500 text-slate-600 dark:text-slate-300 hover:text-white transition-colors border border-white/50 dark:border-white/15"
                     title="Refresh live weather"
                   >
                     <RefreshCw className={`w-4 h-4 ${loadingWeather ? 'animate-spin' : ''}`} />
@@ -314,11 +280,11 @@ export const WeatherLocation: React.FC = () => {
                   <div>
                     <div className="flex items-baseline space-x-3">
                       <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tight">{activeState.temp}°C</span>
-                      <span className={`text-sm font-extrabold uppercase px-3 py-1 rounded-full border ${
-                        activeState.isSunny 
-                          ? 'bg-amber-400/20 border-amber-400/40 text-amber-600 dark:text-amber-300' 
-                          : activeState.isRaining 
-                          ? 'bg-cyan-400/20 border-cyan-400/40 text-cyan-700 dark:text-cyan-300' 
+                      <span className={`text-sm font-extrabold uppercase px-3 py-1 rounded-full border backdrop-blur-md ${
+                        activeState.isSunny
+                          ? 'bg-amber-400/20 border-amber-400/40 text-amber-600 dark:text-amber-300'
+                          : activeState.isRaining
+                          ? 'bg-cyan-400/20 border-cyan-400/40 text-cyan-700 dark:text-cyan-300'
                           : activeState.isNight
                           ? 'bg-indigo-400/20 border-indigo-400/40 text-indigo-500 dark:text-indigo-200'
                           : 'bg-emerald-400/20 border-emerald-400/40 text-emerald-800 dark:text-emerald-300'
@@ -334,23 +300,23 @@ export const WeatherLocation: React.FC = () => {
 
                 {/* Atmospheric Indicators Grid */}
                 <div className="grid grid-cols-3 gap-3">
-                  
+
                   {/* Humidity */}
-                  <div className="p-3 rounded-2xl bg-white/60 dark:bg-slate-950/60 border border-slate-200 dark:border-white/10 text-center space-y-1 backdrop-blur-md">
+                  <div className={`p-3 rounded-2xl ${glassChip} text-center space-y-1`}>
                     <Droplets className="w-5 h-5 text-cyan-400 mx-auto" />
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Humidity</p>
                     <p className="text-sm font-bold text-slate-900 dark:text-white">{weather.humidity}%</p>
                   </div>
 
                   {/* Wind */}
-                  <div className="p-3 rounded-2xl bg-white/60 dark:bg-slate-950/60 border border-slate-200 dark:border-white/10 text-center space-y-1 backdrop-blur-md">
+                  <div className={`p-3 rounded-2xl ${glassChip} text-center space-y-1`}>
                     <Wind className="w-5 h-5 text-emerald-700 dark:text-emerald-400 mx-auto" />
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Wind Speed</p>
                     <p className="text-sm font-bold text-slate-900 dark:text-white">{weather.windSpeed} km/h</p>
                   </div>
 
                   {/* Cloud Cover % on Glass */}
-                  <div className="p-3 rounded-2xl bg-white/60 dark:bg-slate-950/60 border border-slate-200 dark:border-white/10 text-center space-y-1 backdrop-blur-md">
+                  <div className={`p-3 rounded-2xl ${glassChip} text-center space-y-1`}>
                     <Cloud className="w-5 h-5 text-amber-600 dark:text-amber-300 mx-auto" />
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Cloud Cover</p>
                     <p className="text-sm font-bold text-amber-600 dark:text-amber-300">{activeState.cloudCover}%</p>
@@ -358,45 +324,12 @@ export const WeatherLocation: React.FC = () => {
 
                 </div>
 
-                {/* SIMULATION PREVIEW TOGGLES FOR USER */}
-                <div className="pt-2 border-t border-slate-200 dark:border-white/10 space-y-2">
-                  <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
-                    <span className="flex items-center space-x-1">
-                      <Eye className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
-                      <span>Atmospheric Simulation</span>
-                    </span>
-                    <span className="text-emerald-700 dark:text-emerald-400">{simMode === 'auto' ? 'Live Data' : 'Simulated'}</span>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    {[
-                      { id: 'auto', label: '⚡ Live Gatura' },
-                      { id: 'sunny', label: '☀️ Sunny Glow' },
-                      { id: 'rain', label: '🌧️ Raining Drops' },
-                      { id: 'night', label: '🌙 Night Moon' },
-                      { id: 'sunset', label: '🌅 Sunset Glow' },
-                    ].map(btn => (
-                      <button
-                        key={btn.id}
-                        onClick={() => setSimMode(btn.id as any)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-                          simMode === btn.id
-                            ? 'bg-emerald-600 text-white shadow-md scale-105'
-                            : 'bg-white/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-700 hover:text-slate-900 dark:text-white border border-slate-200 dark:border-white/10'
-                        }`}
-                      >
-                        {btn.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
               </div>
 
             </div>
 
             {/* Altitude Card */}
-            <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-100 to-slate-100 dark:from-emerald-950/80 dark:to-slate-900 border border-emerald-500/40 shadow-xl backdrop-blur-xl flex items-center justify-between">
+            <div className={`p-6 rounded-3xl ${glassPanel} flex items-center justify-between`}>
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
                   <Mountain className="w-6 h-6" />
@@ -411,7 +344,7 @@ export const WeatherLocation: React.FC = () => {
             </div>
 
             {/* Directions Note */}
-            <div className="p-5 rounded-2xl bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-sm text-slate-600 dark:text-slate-300 space-y-2">
+            <div className={`p-5 rounded-2xl ${glassPanel} text-sm text-slate-600 dark:text-slate-300 space-y-2`}>
               <div className="flex items-center space-x-2 text-emerald-700 dark:text-emerald-400 font-bold">
                 <Navigation className="w-4 h-4" />
                 <span>Travel Directions</span>
@@ -425,7 +358,7 @@ export const WeatherLocation: React.FC = () => {
 
           {/* Right Column: Live Embedded Google Map */}
           <div className="lg:col-span-7 h-[450px] lg:h-auto min-h-[420px] rounded-3xl overflow-hidden border border-slate-200 dark:border-emerald-500/30 shadow-md relative group">
-            
+
             <iframe
               title="St. Teresa Gatura Girls Senior School Google Map"
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31917.84880942006!2d36.935000!3d-0.835000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f42a5a5a5a5a5%3A0x5a5a5a5a5a5a5a5a!2sGatura%2C%20Kenya!5e0!3m2!1sen!2ske!4v1700000000000!5m2!1sen!2ske"
@@ -435,7 +368,7 @@ export const WeatherLocation: React.FC = () => {
             />
 
             {/* Floating Overlay Badge on Map */}
-            <div className="absolute top-4 left-4 p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-300 dark:border-white/20 text-slate-900 dark:text-white shadow-xl max-w-xs space-y-1">
+            <div className={`absolute top-4 left-4 p-4 rounded-2xl ${glassPanel} text-slate-900 dark:text-white max-w-xs space-y-1`}>
               <div className="flex items-center space-x-2 text-emerald-700 dark:text-emerald-400 font-bold text-xs uppercase">
                 <MapPin className="w-4 h-4" />
                 <span>Pinned Location</span>
@@ -448,7 +381,7 @@ export const WeatherLocation: React.FC = () => {
               href="https://maps.app.goo.gl/oq7iHDB4f6vS2P868"
               target="_blank"
               rel="noopener noreferrer"
-              className="absolute bottom-4 right-4 px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xl flex items-center space-x-2 transition-transform hover:scale-105"
+              className="absolute bottom-4 right-4 px-4 py-2.5 rounded-xl bg-emerald-700/90 backdrop-blur-md hover:bg-emerald-800 text-white font-bold text-xs shadow-xl flex items-center space-x-2 transition-transform hover:scale-105"
             >
               <span>Open in Google Maps</span>
               <ExternalLink className="w-3.5 h-3.5" />
