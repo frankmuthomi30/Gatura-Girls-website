@@ -3,19 +3,19 @@ import { FAQItem } from '../types';
 import {
   HelpCircle,
   ChevronDown,
-  ChevronRight,
   BookOpen,
   GraduationCap,
   Compass,
   Layers,
   CheckCircle,
   FlaskConical,
-  Sprout,
   Calculator,
   Languages,
   HeartPulse,
   Users,
   Cpu,
+  Plane,
+  Ticket,
 } from 'lucide-react';
 
 interface FAQAccordionProps {
@@ -23,7 +23,7 @@ interface FAQAccordionProps {
 }
 
 // ---------------------------------------------------------------------------
-// Pathways types & data (mirrors the pathways.json shape)
+// Pathways data (mirrors the pathways.json shape)
 // ---------------------------------------------------------------------------
 
 interface Subject {
@@ -35,9 +35,11 @@ interface Subject {
 interface Pathway {
   id: string;
   name: string;
+  destination: string;
   description: string;
-  icon: string;
+  icon: React.ElementType;
   color: string;
+  gate: string;
   subjects: Subject[];
 }
 
@@ -55,19 +57,16 @@ const CORE_SUBJECTS: CoreSubject[] = [
   { name: 'ICT', icon: Cpu },
 ];
 
-const PATHWAY_ICON_MAP: Record<string, React.ElementType> = {
-  flask: FlaskConical,
-  'book-open': BookOpen,
-};
-
 const PATHWAYS: Pathway[] = [
   {
     id: 'stem',
     name: 'STEM',
+    destination: 'Sciences, Engineering & Technology',
     description:
-      'Science, Technology, Engineering and Mathematics pathway for learners interested in scientific and technical careers.',
-    icon: 'flask',
+      'For learners who think in numbers and experiments — built toward medicine, engineering and computing careers.',
+    icon: FlaskConical,
     color: '#16a34a',
+    gate: 'PWY-STEM',
     subjects: [
       { code: 'ST103', name: 'Biology', category: 'Science' },
       { code: 'ST105', name: 'Chemistry', category: 'Science' },
@@ -81,10 +80,12 @@ const PATHWAYS: Pathway[] = [
   {
     id: 'social-sciences',
     name: 'Social Sciences',
+    destination: 'Humanities, Business & Languages',
     description:
-      'A pathway for learners pursuing humanities, business, languages and social sciences.',
-    icon: 'book-open',
+      'For learners who think in words and people — built toward law, journalism, business and public service.',
+    icon: BookOpen,
     color: '#2563eb',
+    gate: 'PWY-SOSC',
     subjects: [
       { code: 'SS202', name: 'Literature in English', category: 'Languages' },
       { code: 'SS217', name: 'History & Citizenship', category: 'Humanities' },
@@ -121,7 +122,6 @@ function groupByCategory(subjects: Subject[]) {
 export const FAQAccordion: React.FC<FAQAccordionProps> = ({ faqs }) => {
   const [openId, setOpenId] = useState<string | null>(faqs[0]?.id || null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [activePathwayId, setActivePathwayId] = useState<string>(PATHWAYS[0]?.id ?? '');
 
   const categories = ['All', 'General', 'Admissions', 'Academics', 'Boarding & Facilities'];
 
@@ -236,120 +236,120 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({ faqs }) => {
 
         </div>
 
-        {/* Pathways Section — foundation core + branching STEM / Social Sciences */}
-        <div className="mb-20">
-          <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+        {/* ------------------------------------------------------------- */}
+        {/* Pathways — reframed as a journey: check in at the Terminal   */}
+        {/* (core subjects), then board one of two flights (pathways).   */}
+        {/* ------------------------------------------------------------- */}
+        <div className="mb-24">
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-14">
             <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
               <Compass className="w-4 h-4" />
               <span>CBC Senior Secondary</span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
-              One Foundation, Two Pathways
+              Every Learner Checks In the Same Way.
+              <br className="hidden sm:block" /> She Boards Differently.
             </h2>
             <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg font-light leading-relaxed">
-              Every learner at St. Teresa Gatura builds from the same core, then
-              branches into the pathway that fits her strengths and ambitions.
+              Six core subjects are the terminal every learner passes through.
+              From there, she boards one of two pathways toward her destination.
             </p>
           </div>
 
-          {/* Foundation band — the shared trunk every pathway grows from */}
-          <div className="relative mb-4">
-            <div className="rounded-3xl bg-white dark:bg-slate-900 border-2 border-emerald-500/30 shadow-xl p-6 sm:p-8">
-              <div className="flex items-center gap-2 mb-5 justify-center">
-                <Sprout className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                <h3 className="text-sm font-extrabold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
-                  The Core — Every Learner, Every Pathway
-                </h3>
+          {/* TERMINAL — departure board for core subjects */}
+          <div className="rounded-2xl bg-slate-900 border-t-4 border-amber-400 shadow-2xl shadow-slate-900/20 overflow-hidden mb-6">
+            <div className="flex items-center justify-between px-5 sm:px-6 py-3 border-b border-slate-700/60">
+              <div className="flex items-center gap-2 text-amber-400">
+                <Plane className="w-4 h-4" />
+                <span className="text-xs font-bold uppercase tracking-[0.2em]">Terminal · Foundation Subjects</span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                {CORE_SUBJECTS.map((subject) => {
-                  const Icon = subject.icon;
-                  return (
-                    <div
-                      key={subject.name}
-                      className="flex flex-col items-center text-center gap-2 p-4 rounded-2xl bg-emerald-50 dark:bg-slate-800/60 border border-emerald-100 dark:border-slate-700"
-                    >
-                      <div className="p-2.5 rounded-xl bg-emerald-600/10 text-emerald-600 dark:text-emerald-400">
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 leading-snug">
-                        {subject.name}
-                      </span>
-                    </div>
-                  );
-                })}
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider">Required · All Learners</span>
               </div>
             </div>
 
-            {/* Branch connectors down to the two pathway cards (desktop only) */}
-            <svg
-              className="hidden lg:block absolute left-0 right-0 -bottom-10 w-full h-10 text-emerald-500/40"
-              viewBox="0 0 100 20"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M 50 0 L 50 8 M 50 8 L 25 8 L 25 20 M 50 8 L 75 8 L 75 20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="0.6"
-              />
-            </svg>
+            <div className="divide-y divide-slate-800">
+              {CORE_SUBJECTS.map((subject, i) => {
+                const Icon = subject.icon;
+                return (
+                  <div
+                    key={subject.name}
+                    className="flex items-center gap-4 px-5 sm:px-6 py-3 font-mono text-amber-300/90"
+                  >
+                    <span className="text-xs text-slate-500 w-6 shrink-0">{String(i + 1).padStart(2, '0')}</span>
+                    <Icon className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span className="text-sm sm:text-base tracking-wide uppercase flex-1">{subject.name}</span>
+                    <span className="hidden sm:inline text-[10px] text-slate-500 tracking-widest">CHECKED IN</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Pathway cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-14 lg:mt-4">
+          {/* BOARDING PASSES — one ticket per pathway */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {PATHWAYS.map((pathway) => {
-              const Icon = PATHWAY_ICON_MAP[pathway.icon] ?? BookOpen;
-              const isActive = activePathwayId === pathway.id;
+              const Icon = pathway.icon;
               const groups = groupByCategory(pathway.subjects);
 
               return (
                 <div
                   key={pathway.id}
-                  className="rounded-3xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden transition-all hover:border-emerald-500/40"
-                  style={{ borderTopColor: pathway.color, borderTopWidth: 4 }}
+                  className="relative flex flex-col sm:flex-row rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden transition-transform duration-300 hover:-translate-y-1"
                 >
-                  <button
-                    onClick={() => setActivePathwayId(isActive ? '' : pathway.id)}
-                    className="w-full p-8 text-left flex items-start justify-between gap-4"
+                  {/* Ink stamp */}
+                  <div
+                    className="absolute top-4 right-4 sm:top-5 sm:right-5 flex items-center gap-1 px-2.5 py-1 rounded-md border-2 -rotate-6 opacity-80 pointer-events-none"
+                    style={{ borderColor: pathway.color, color: pathway.color }}
                   >
-                    <div className="flex items-start gap-4">
-                      <div
-                        className="p-3 rounded-2xl shrink-0"
-                        style={{ backgroundColor: `${pathway.color}1a`, color: pathway.color }}
-                      >
-                        <Icon className="w-7 h-7" />
-                      </div>
-                      <div className="space-y-1.5">
-                        <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">
-                          {pathway.name} Pathway
-                        </h3>
-                        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-light">
-                          {pathway.description}
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronRight
-                      className={`w-5 h-5 shrink-0 mt-2 text-slate-400 transition-transform duration-300 ${
-                        isActive ? 'rotate-90' : ''
-                      }`}
-                    />
-                  </button>
+                    <CheckCircle className="w-3 h-3" />
+                    <span className="text-[9px] font-extrabold uppercase tracking-widest">CBC Approved</span>
+                  </div>
 
-                  {isActive && (
-                    <div className="px-8 pb-8 space-y-5 border-t border-slate-200 dark:border-slate-800 pt-6">
+                  {/* Stub */}
+                  <div
+                    className="sm:w-36 shrink-0 flex sm:flex-col items-center justify-between sm:justify-center gap-3 p-5 border-b sm:border-b-0 sm:border-r border-dashed border-slate-300 dark:border-slate-700 relative"
+                    style={{ backgroundColor: `${pathway.color}0d` }}
+                  >
+                    <div
+                      className="p-3 rounded-2xl"
+                      style={{ backgroundColor: `${pathway.color}1a`, color: pathway.color }}
+                    >
+                      <Icon className="w-7 h-7" />
+                    </div>
+                    <div className="sm:text-center">
+                      <p className="text-[10px] font-mono text-slate-400 tracking-widest">{pathway.gate}</p>
+                      <p className="text-sm font-extrabold text-slate-900 dark:text-white leading-tight">{pathway.name}</p>
+                    </div>
+
+                    {/* Punch-hole notches on the perforation (desktop only) */}
+                    <span className="hidden sm:block absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-emerald-50 dark:bg-slate-950" />
+                    <span className="hidden sm:block absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-emerald-50 dark:bg-slate-950" />
+                  </div>
+
+                  {/* Manifest */}
+                  <div className="flex-1 p-6 pt-8 sm:pt-6 flex flex-col">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Ticket className="w-4 h-4" style={{ color: pathway.color }} />
+                      <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: pathway.color }}>
+                        Destination: {pathway.destination}
+                      </p>
+                    </div>
+                    <p className="text-sm text-slate-600 dark:text-slate-300 font-light leading-relaxed mb-5">
+                      {pathway.description}
+                    </p>
+
+                    <div className="space-y-4 flex-1">
                       {groups.map(({ category, subjects }) => (
                         <div key={category}>
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
-                            {category}
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5">
+                            Class · {category}
                           </p>
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-x-4 gap-y-1.5">
                             {subjects.map((subject) => (
-                              <span
-                                key={subject.code}
-                                className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700"
-                              >
+                              <span key={subject.code} className="text-xs text-slate-700 dark:text-slate-200 whitespace-nowrap">
+                                <span className="font-mono text-slate-400 dark:text-slate-500 mr-1">{subject.code}</span>
                                 {subject.name}
                               </span>
                             ))}
@@ -357,7 +357,22 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({ faqs }) => {
                         </div>
                       ))}
                     </div>
-                  )}
+
+                    {/* Barcode footer */}
+                    <div className="mt-6 pt-4 border-t border-dashed border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
+                      <div
+                        className="h-6 flex-1 max-w-[160px] opacity-70"
+                        style={{
+                          backgroundImage:
+                            'repeating-linear-gradient(90deg, currentColor 0 2px, transparent 2px 5px)',
+                          color: pathway.color,
+                        }}
+                      />
+                      <span className="text-[10px] font-mono text-slate-400 tracking-widest">
+                        {pathway.gate}-{pathway.subjects.length}SUBJ
+                      </span>
+                    </div>
+                  </div>
                 </div>
               );
             })}
