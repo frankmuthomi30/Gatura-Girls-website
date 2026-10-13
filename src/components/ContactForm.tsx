@@ -82,7 +82,7 @@ export const ContactForm: React.FC = () => {
           {/* Left Column: Contact Details Cards */}
           <div className="lg:col-span-5 space-y-6">
             
-            <div className="p-8 rounded-3xl bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-200 dark:border-emerald-500/30 shadow-md space-y-6">
+            <div className="p-8 rounded-3xl bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-emerald-500/30 shadow-md space-y-6">
               <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white">Contact Information</h3>
               <p className="text-sm text-slate-600 dark:text-slate-300 font-light">
                 Feel free to contact us via phone, email, or visit our administration office during official hours.
@@ -96,8 +96,11 @@ export const ContactForm: React.FC = () => {
                   <div>
                     <p className="font-bold text-slate-900 dark:text-white">Physical Location</p>
                     <p className="text-xs text-slate-600 dark:text-slate-300">Gatura Town, Gatanga Sub-County, P.O. Box 30-01013 Gatura, Murang'a County, Kenya</p>
+                    <p className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 font-semibold mt-0.5">
+                      Coordinates: -0.859845, 36.860207
+                    </p>
                     <a 
-                      href="https://maps.app.goo.gl/oq7iHDB4f6vS2P868" 
+                      href="https://www.google.com/maps?q=-0.859845,36.860207" 
                       target="_blank" 
                       rel="noopener noreferrer" 
                       className="inline-flex items-center space-x-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold hover:underline mt-1"
@@ -246,7 +249,7 @@ export const ContactForm: React.FC = () => {
                         className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500"
                       >
                         <option value="">Select Category</option>
-                        <option value="Admission Inquiry">Admission Inquiry (8-4-4 / CBC)</option>
+                        <option value="Grade 10 CBC Placement">Grade 10 CBC Placement & Inquiry</option>
                         <option value="Fee Structure">Fee Structure & Payments</option>
                         <option value="Career & Job Application">Career & Job Application</option>
                         <option value="General Enquiry">General Enquiry</option>

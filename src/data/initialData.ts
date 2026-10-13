@@ -20,15 +20,15 @@ export const INITIAL_FAQS: FAQItem[] = [
   },
   {
     id: 'f2',
-    question: 'What academic curricula and pathways are offered?',
-    answer: 'St. Teresa Gatura Girls offers both the 8-4-4 System (preparing Form 1–4 students for KCSE) and the Competency-Based Curriculum (CBC) Senior Secondary Pathways (Grade 10–12) offering STEM (Science, Tech, Engineering, Math), Social Sciences (Humanities & Languages), and Arts & Sports Science pathways.',
+    question: 'What academic curriculum and approved CBC senior pathways are offered?',
+    answer: 'St. Teresa Gatura Girls is a dedicated Senior Secondary School offering the approved Competency-Based Curriculum (CBC) for Grade 10–12. The school is officially approved by the Ministry of Education & KICD for all 3 senior pathways with 56 approved combinations: STEM (Pure & Applied Sciences — 26 combinations), Social Sciences (Humanities & Business Studies, Languages & Literature — 28 combinations), and Arts & Sports Science (Sports track — 2 combinations).',
     category: 'Academics',
     order: 2
   },
   {
     id: 'f3',
-    question: 'How do I apply for Form 1 or Grade 10 CBC Admission?',
-    answer: 'Admissions can be submitted online through our Online Admissions Portal on this website or directly at the school principal\'s office during working hours. Requirements include KCPE / Grade 9 KPSEA results slips, birth certificate copy, leaving certificate, and medical report.',
+    question: 'How do I apply for Grade 10 CBC Senior Secondary Placement?',
+    answer: 'Inquiries and applications for Grade 10 CBC Senior Secondary School placement can be made directly at the school principal\'s office during working hours or via our official website contact form and school administration email (gaturagirls@gmail.com). Requirements include Grade 9 KPSEA results slips, birth certificate copy, junior secondary leaving certificate, and medical report.',
     category: 'Admissions',
     order: 3
   },

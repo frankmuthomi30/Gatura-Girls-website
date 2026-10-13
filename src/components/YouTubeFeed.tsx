@@ -36,7 +36,7 @@ const YOUTUBE_VIDEOS = [
     duration: '6:30',
     category: 'Address',
     thumbnail: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80',
-    description: 'Sr. Beatrice Mwangi outlines the school values, 8-4-4 and CBC pathway opportunities.'
+    description: 'Sr. Beatrice Mwangi outlines the school values and CBC Senior School pathway opportunities.'
   }
 ];
 

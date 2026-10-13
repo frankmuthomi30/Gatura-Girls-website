@@ -20,10 +20,9 @@ interface NewsJobsSectionProps {
   news: NewsItem[];
   jobs: JobPosting[];
   links: UsefulLink[];
-  onOpenAdmissions: () => void;
 }
 
-export const NewsJobsSection: React.FC<NewsJobsSectionProps> = ({ news, jobs, links, onOpenAdmissions }) => {
+export const NewsJobsSection: React.FC<NewsJobsSectionProps> = ({ news, jobs, links }) => {
   const [activeTab, setActiveTab] = useState<'news' | 'jobs' | 'downloads'>('news');
   const [selectedNewsCategory, setSelectedNewsCategory] = useState<string>('All');
   const [newsSearch, setNewsSearch] = useState('');

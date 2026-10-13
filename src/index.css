@@ -2,6 +2,22 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+html {
+  background-color: #FAF7F2;
+  color: #161311;
+  color-scheme: light;
+}
+
+html.dark {
+  background-color: #080D0B;
+  color: #F3F0E9;
+  color-scheme: dark;
+}
+
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 @keyframes raindrop {
   0% {
     transform: translateY(-20px) scale(0.8);

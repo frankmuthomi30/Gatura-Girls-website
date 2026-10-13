@@ -118,3 +118,14 @@ export interface WeatherData {
   isDay?: boolean;
   weatherCode?: number;
 }
+
+export type PathwayName = 'STEM' | 'ARTS & SPORTS SCIENCE' | 'SOCIAL SCIENCES';
+
+export interface ApprovedCombination {
+  pathway: PathwayName;
+  track: string;
+  subjects: string[];
+  code: string;
+  status: 'Approved';
+  recommendedCareers?: string;
+}

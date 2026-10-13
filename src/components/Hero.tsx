@@ -14,7 +14,6 @@ import { INITIAL_HERO_SLIDES } from '../data/initialData';
 
 interface HeroProps {
   onExplorePrograms: () => void;
-  onOpenAdmissions: () => void;
   slides?: HeroSlide[];
 }
 
@@ -24,7 +23,7 @@ const CREDENTIALS = [
   { label: 'Christian Character & Discipline' }
 ];
 
-export const Hero: React.FC<HeroProps> = ({ onExplorePrograms, onOpenAdmissions, slides }) => {
+export const Hero: React.FC<HeroProps> = ({ onExplorePrograms, slides }) => {
   // Respect admin slides: if slides prop is passed, use it (even if empty array). Only fallback to initial if slides prop is undefined.
   const activeSlides = slides !== undefined ? slides : INITIAL_HERO_SLIDES;
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -95,7 +94,7 @@ export const Hero: React.FC<HeroProps> = ({ onExplorePrograms, onOpenAdmissions,
             </h1>
 
             <p className="text-base sm:text-lg text-[#5B5346] dark:text-[#A8A196] font-light max-w-xl leading-relaxed">
-              Offering both the <strong className="text-[#161311] dark:text-[#F3F0E9] font-semibold">8-4-4 System</strong> and the{' '}
+              Dedicated Senior Secondary School offering the approved{' '}
               <strong className="text-[#161311] dark:text-[#F3F0E9] font-semibold">Competency-Based Curriculum (CBC)</strong> Senior
               Secondary Pathways, Grade 10–12, with state-of-the-art STEM, Humanities, and
               Creative Arts facilities.
@@ -117,20 +116,20 @@ export const Hero: React.FC<HeroProps> = ({ onExplorePrograms, onOpenAdmissions,
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2">
               <button
-                onClick={onOpenAdmissions}
+                onClick={onExplorePrograms}
                 className="flex items-center justify-center gap-3 px-7 py-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-base shadow-lg shadow-emerald-700/20 hover:shadow-xl transition-all"
               >
-                <span>2027 Admissions Open</span>
-                <ArrowRight className="w-5 h-5" />
+                <BookOpen className="w-5 h-5 text-white" />
+                <span>Explore CBC Pathways</span>
+                <ArrowRight className="w-5 h-5 text-white" />
               </button>
 
-              <button
-                onClick={onExplorePrograms}
+              <a
+                href="#contact"
                 className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl border border-[#D8D0C2] dark:border-[#232839] text-[#161311] dark:text-[#F3F0E9] font-semibold text-base hover:border-emerald-600 dark:hover:border-emerald-500 transition-all"
               >
-                <BookOpen className="w-5 h-5 text-emerald-700 dark:text-emerald-400" />
-                <span>Explore Academic Pathways</span>
-              </button>
+                <span>Contact School Administration</span>
+              </a>
             </div>
           </div>
 

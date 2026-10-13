@@ -4,12 +4,11 @@ import { Megaphone, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react
 
 interface BannerSliderProps {
   banners: BannerAd[];
-  onOpenAdmissions: () => void;
 }
 
 const AUTOPLAY_MS = 6000;
 
-export const BannerSlider: React.FC<BannerSliderProps> = ({ banners, onOpenAdmissions }) => {
+export const BannerSlider: React.FC<BannerSliderProps> = ({ banners }) => {
   const activeBanners = (banners || []).filter(b => b.active);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -26,21 +25,22 @@ export const BannerSlider: React.FC<BannerSliderProps> = ({ banners, onOpenAdmis
   const currentBanner = activeBanners[currentIndex] || activeBanners[0];
 
   const handleCtaClick = () => {
-    if (currentBanner.ctaLink === '#admissions') {
-      onOpenAdmissions();
-    } else if (currentBanner.ctaLink) {
+    if (currentBanner.ctaLink && currentBanner.ctaLink !== '#admissions') {
       const elem = document.querySelector(currentBanner.ctaLink);
       if (elem) {
         elem.scrollIntoView({ behavior: 'smooth' });
+        return;
       }
-    } else {
-      onOpenAdmissions();
+    }
+    const fallback = document.querySelector('#contact') || document.querySelector('#about');
+    if (fallback) {
+      fallback.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="rounded-2xl overflow-hidden bg-white dark:bg-[#0F1420] border border-[#E5DFD2] dark:border-[#232839] shadow-sm">
+      <div className="rounded-2xl overflow-hidden bg-white dark:bg-[#0F1811] border border-[#E5DFD2] dark:border-[#1E2A24] shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-12">
 
           {/* Text Panel — solid background, always legible regardless of image */}

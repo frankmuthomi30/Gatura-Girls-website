@@ -1,151 +1,116 @@
-import React, { useState } from 'react';
-import { FAQItem } from '../types';
+import React, { useState, useMemo } from 'react';
+import { FAQItem, PathwayName } from '../types';
 import {
   HelpCircle,
   ChevronDown,
   BookOpen,
   GraduationCap,
-  Compass,
-  Layers,
-  CheckCircle,
+  CheckCircle2,
   FlaskConical,
-  Calculator,
-  Languages,
-  HeartPulse,
-  Users,
-  Cpu,
-  Plane,
-  Ticket,
+  Compass,
+  Search,
+  Sparkles,
+  Table as TableIcon,
+  LayoutGrid,
+  Award,
+  ArrowRight,
+  X,
+  Palette,
+  Users
 } from 'lucide-react';
+import {
+  APPROVED_COMBINATIONS,
+  PATHWAY_METADATA,
+  CORE_FOUNDATION_SUBJECTS
+} from '../data/approvedPathways';
 
 interface FAQAccordionProps {
   faqs: FAQItem[];
 }
 
-// ---------------------------------------------------------------------------
-// Pathways data (mirrors the pathways.json shape)
-// ---------------------------------------------------------------------------
-
-interface Subject {
-  code: string;
-  name: string;
-  category: string;
-}
-
-interface Pathway {
-  id: string;
-  name: string;
-  destination: string;
-  description: string;
-  icon: React.ElementType;
-  color: string;
-  gate: string;
-  subjects: Subject[];
-}
-
-interface CoreSubject {
-  name: string;
-  icon: React.ElementType;
-}
-
-const CORE_SUBJECTS: CoreSubject[] = [
-  { name: 'Mathematics', icon: Calculator },
-  { name: 'English', icon: Languages },
-  { name: 'Kiswahili / KSL', icon: Languages },
-  { name: 'Physical & Health Education', icon: HeartPulse },
-  { name: 'Community Service Learning', icon: Users },
-  { name: 'ICT', icon: Cpu },
-];
-
-const PATHWAYS: Pathway[] = [
-  {
-    id: 'stem',
-    name: 'STEM',
-    destination: 'Sciences, Engineering & Technology',
-    description:
-      'For learners who think in numbers and experiments — built toward medicine, engineering and computing careers.',
-    icon: FlaskConical,
-    color: '#16a34a',
-    gate: 'PWY-STEM',
-    subjects: [
-      { code: 'ST103', name: 'Biology', category: 'Science' },
-      { code: 'ST105', name: 'Chemistry', category: 'Science' },
-      { code: 'ST104', name: 'Physics', category: 'Science' },
-      { code: 'ST109', name: 'Agriculture', category: 'Applied Science' },
-      { code: 'ST107', name: 'Computer Studies', category: 'Technology' },
-      { code: 'ST108', name: 'Home Science', category: 'Applied Science' },
-      { code: 'SS216', name: 'Business Studies', category: 'Business' },
-    ],
-  },
-  {
-    id: 'social-sciences',
-    name: 'Social Sciences',
-    destination: 'Humanities, Business & Languages',
-    description:
-      'For learners who think in words and people — built toward law, journalism, business and public service.',
-    icon: BookOpen,
-    color: '#2563eb',
-    gate: 'PWY-SOSC',
-    subjects: [
-      { code: 'SS202', name: 'Literature in English', category: 'Languages' },
-      { code: 'SS217', name: 'History & Citizenship', category: 'Humanities' },
-      { code: 'SS218', name: 'Geography', category: 'Humanities' },
-      { code: 'SS212', name: 'Christian Religious Education (CRE)', category: 'Religious Education' },
-      { code: 'SS204', name: 'Fasihi ya Kiswahili', category: 'Languages' },
-      { code: 'SS208', name: 'French', category: 'Languages' },
-      { code: 'SS216', name: 'Business Studies', category: 'Business' },
-      { code: 'ST107', name: 'Computer Studies', category: 'Technology' },
-      { code: 'ST108', name: 'Home Science', category: 'Applied Science' },
-      { code: 'ST109', name: 'Agriculture', category: 'Applied Science' },
-    ],
-  },
-];
-
-// Group a pathway's subjects by their category, preserving first-seen order
-function groupByCategory(subjects: Subject[]) {
-  const order: string[] = [];
-  const groups: Record<string, Subject[]> = {};
-  subjects.forEach((s) => {
-    if (!groups[s.category]) {
-      groups[s.category] = [];
-      order.push(s.category);
-    }
-    groups[s.category].push(s);
-  });
-  return order.map((category) => ({ category, subjects: groups[category] }));
-}
-
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
-
 export const FAQAccordion: React.FC<FAQAccordionProps> = ({ faqs }) => {
-  const [openId, setOpenId] = useState<string | null>(faqs[0]?.id || null);
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  // FAQ state
+  const [openFaqId, setOpenFaqId] = useState<string | null>(faqs[0]?.id || null);
+  const [selectedFaqCategory, setSelectedFaqCategory] = useState<string>('All');
 
-  const categories = ['All', 'General', 'Admissions', 'Academics', 'Boarding & Facilities'];
+  // Pathways & Subject Combinations state
+  const [selectedPathway, setSelectedPathway] = useState<PathwayName | 'ALL'>('ALL');
+  const [selectedTrack, setSelectedTrack] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
 
-  const filteredFaqs = selectedCategory === 'All' 
-    ? faqs 
-    : (faqs || []).filter(f => f.category === selectedCategory);
+  const faqCategories = ['All', 'General', 'Admissions', 'Academics', 'Boarding & Facilities'];
+
+  const filteredFaqs = selectedFaqCategory === 'All'
+    ? faqs
+    : (faqs || []).filter(f => f.category === selectedFaqCategory);
 
   const toggleFAQ = (id: string) => {
-    setOpenId(openId === id ? null : id);
+    setOpenFaqId(openFaqId === id ? null : id);
+  };
+
+  // Compute available tracks based on selected pathway
+  const availableTracks = useMemo(() => {
+    const tracks = new Set<string>();
+    const list = selectedPathway === 'ALL'
+      ? APPROVED_COMBINATIONS
+      : APPROVED_COMBINATIONS.filter(c => c.pathway === selectedPathway);
+    list.forEach(c => tracks.add(c.track));
+    return ['ALL', ...Array.from(tracks)];
+  }, [selectedPathway]);
+
+  // Filter approved combinations
+  const filteredCombinations = useMemo(() => {
+    return APPROVED_COMBINATIONS.filter(combo => {
+      // Pathway filter
+      if (selectedPathway !== 'ALL' && combo.pathway !== selectedPathway) {
+        return false;
+      }
+      // Track filter
+      if (selectedTrack !== 'ALL' && combo.track !== selectedTrack) {
+        return false;
+      }
+      // Search query
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase().trim();
+        const codeMatch = combo.code.toLowerCase().includes(query);
+        const pathwayMatch = combo.pathway.toLowerCase().includes(query);
+        const trackMatch = combo.track.toLowerCase().includes(query);
+        const subjectMatch = combo.subjects.some(s => s.toLowerCase().includes(query));
+        const careerMatch = combo.recommendedCareers?.toLowerCase().includes(query) ?? false;
+        return codeMatch || pathwayMatch || trackMatch || subjectMatch || careerMatch;
+      }
+      return true;
+    });
+  }, [selectedPathway, selectedTrack, searchQuery]);
+
+  // Counts for tabs
+  const stemCount = APPROVED_COMBINATIONS.filter(c => c.pathway === 'STEM').length;
+  const artsCount = APPROVED_COMBINATIONS.filter(c => c.pathway === 'ARTS & SPORTS SCIENCE').length;
+  const socialCount = APPROVED_COMBINATIONS.filter(c => c.pathway === 'SOCIAL SCIENCES').length;
+
+  const handleApplyCombo = (_code: string) => {
+    const elem = document.getElementById('contact');
+    if (elem) {
+      elem.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
-    <section id="about" className="py-20 bg-emerald-50/40 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors relative">
+    <section id="about" className="py-20 bg-slate-50/70 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* About School Overview Grid */}
+        {/* ======================================================== */}
+        {/* SECTION 1: ABOUT ST. TERESA GATURA & DUAL SYSTEM OVERVIEW */}
+        {/* ======================================================== */}
         <div className="mb-20 space-y-12">
           
           <div className="text-center max-w-3xl mx-auto space-y-4">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
               <BookOpen className="w-4 h-4" />
-              <span>About St. Teresa Gatura Girls</span>
+              <span>Academic Curriculum & Senior Secondary</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               A Beacon of Girls' Education in Kenya
             </h2>
             <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg font-light leading-relaxed">
@@ -153,81 +118,81 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({ faqs }) => {
             </p>
           </div>
 
-          {/* 8-4-4 vs CBC Pathways Glassmorphism Card comparison */}
+          {/* CBC Senior Secondary Curriculum Framework Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             
-            {/* 8-4-4 Card */}
-            <div className="p-8 rounded-3xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-xl space-y-5 hover:border-emerald-500/40 transition-all">
+            {/* Card 1: 3 Approved CBC Pathways */}
+            <div className="p-8 rounded-3xl bg-white dark:bg-slate-900/90 text-slate-900 dark:text-white border border-emerald-500/30 dark:border-emerald-500/40 shadow-sm hover:shadow-md transition-all space-y-5 relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-emerald-700 dark:bg-emerald-600 text-white font-extrabold text-[10px] uppercase tracking-wider px-3.5 py-1.5 rounded-bl-xl shadow-sm">
+                Grade 10–12 CBC Accredited
+              </div>
+
               <div className="flex items-center space-x-3">
-                <div className="p-3 rounded-2xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
-                  <GraduationCap className="w-7 h-7" />
+                <div className="p-3 rounded-2xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
+                  <Award className="w-7 h-7" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">8-4-4 Curriculum System</h3>
-                  <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase">KCSE Form 1 — Form 4</p>
+                  <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">CBC Senior Secondary Pathways</h3>
+                  <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide">3 Approved Pathways • {APPROVED_COMBINATIONS.length} Combinations</p>
                 </div>
               </div>
 
               <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-light">
-                Comprehensive secondary education designed for rigor in Kenya National Examinations Council (KNEC) standards.
+                Nationally accredited senior secondary curriculum equipping girls with specialized investigation skills, career pathways, and academic excellence:
               </p>
 
               <ul className="space-y-2.5 text-sm text-slate-700 dark:text-slate-200">
-                <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>Mathematics, Physics, Chemistry & Biology Focus</span>
+                <li className="flex items-start space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>STEM Pathway:</strong> 8 Approved Pure Sciences & Applied Sciences combinations.</span>
                 </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>Humanities: History, Geography, CRE, Business Studies</span>
+                <li className="flex items-start space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>Social Sciences Pathway:</strong> 11 Approved Humanities, Business Studies & Languages combinations.</span>
                 </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>Languages: English, Kiswahili, French & German Options</span>
+                <li className="flex items-start space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>Arts & Sports Science Pathway:</strong> 2 Approved Sports & Creative Arts combinations.</span>
                 </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>Targeted KCSE Revision & Mentorship Workshops</span>
+                <li className="flex items-start space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <span>Specialized modern laboratories, Computer Hub, and teacher mentorship preparing girls for university degrees.</span>
                 </li>
               </ul>
             </div>
 
-            {/* CBC Senior Secondary Card */}
-            <div className="p-8 rounded-3xl bg-emerald-50 dark:bg-slate-900 text-slate-900 dark:text-white border border-emerald-500/40 shadow-md space-y-5 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-emerald-600 text-white font-extrabold text-[10px] uppercase tracking-wider px-3 py-1 rounded-bl-xl">
-                Grade 10–12 CBC Ready
-              </div>
-
+            {/* Card 2: Compulsory Core Foundation Subjects & Values */}
+            <div className="p-8 rounded-3xl bg-slate-50 dark:bg-slate-900/80 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all space-y-5">
               <div className="flex items-center space-x-3">
-                <div className="p-3 rounded-2xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-emerald-500/30">
-                  <Layers className="w-7 h-7" />
+                <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                  <GraduationCap className="w-7 h-7" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">CBC Senior Secondary Pathways</h3>
-                  <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase">Competency-Based Learning</p>
+                  <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">Core Foundation & Holistic Development</h3>
+                  <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide">Compulsory Subjects & Life Competencies</p>
                 </div>
               </div>
 
-              <p className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-light">
-                Tailored educational pathways equipping learners with practical competencies, digital skills, and career orientation.
+              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-light">
+                Every Grade 10–12 learner completes national core foundation subjects that foster ethical leadership, digital literacy, and civic responsibility:
               </p>
 
               <ul className="space-y-2.5 text-sm text-slate-700 dark:text-slate-200">
-                <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span><strong>STEM Pathway:</strong> Pure Sciences, Computer Science & Engineering Studies</span>
+                <li className="flex items-start space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>Mathematics & Languages:</strong> Mathematics (Core/Advanced), English, Kiswahili.</span>
                 </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span><strong>Social Sciences Pathway:</strong> Literature, Languages, Business & History</span>
+                <li className="flex items-start space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>Digital Literacy & Technology:</strong> ICT competencies and hands-on digital research.</span>
                 </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span><strong>Arts & Sports Science Pathway:</strong> Performing Arts, Fine Art & Athletics</span>
+                <li className="flex items-start space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>Physical Health & Service:</strong> Physical Education (PE) and Community Service Learning (CSL).</span>
                 </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>Practical Community Service Learning (CSL) Projects</span>
+                <li className="flex items-start space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <span>Strong Christian moral grounding, leadership opportunities, and nurturing personal talents.</span>
                 </li>
               </ul>
             </div>
@@ -236,170 +201,454 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({ faqs }) => {
 
         </div>
 
-        {/* ------------------------------------------------------------- */}
-        {/* Pathways — reframed as a journey: check in at the Terminal   */}
-        {/* (core subjects), then board one of two flights (pathways).   */}
-        {/* ------------------------------------------------------------- */}
-        <div className="mb-24">
-          <div className="text-center max-w-3xl mx-auto space-y-4 mb-14">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
-              <Compass className="w-4 h-4" />
-              <span>CBC Senior Secondary</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
-              Every Learner Checks In the Same Way.
-              <br className="hidden sm:block" /> She Boards Differently.
-            </h2>
-            <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg font-light leading-relaxed">
-              Six core subjects are the terminal every learner passes through.
-              From there, she boards one of two pathways toward her destination.
-            </p>
-          </div>
-
-          {/* TERMINAL — departure board for core subjects */}
-          <div className="rounded-2xl bg-slate-900 border-t-4 border-amber-400 shadow-2xl shadow-slate-900/20 overflow-hidden mb-6">
-            <div className="flex items-center justify-between px-5 sm:px-6 py-3 border-b border-slate-700/60">
-              <div className="flex items-center gap-2 text-amber-400">
-                <Plane className="w-4 h-4" />
-                <span className="text-xs font-bold uppercase tracking-[0.2em]">Terminal · Foundation Subjects</span>
+        {/* ======================================================== */}
+        {/* SECTION 2: OFFICIAL APPROVED SUBJECT COMBINATIONS TABLE   */}
+        {/* ======================================================== */}
+        <div id="pathways" className="mb-24 scroll-mt-24">
+          
+          {/* Header & Official Accreditation Banner */}
+          <div className="rounded-3xl p-6 sm:p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 mb-8">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-slate-200 dark:border-slate-800 pb-6">
+              <div className="space-y-2">
+                <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Official KICD & Ministry of Education Approval Status</span>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                  Approved Senior Secondary Subject Combinations
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-300 max-w-2xl font-light">
+                  St. Teresa Gatura Girls Senior School has been accredited by the Ministry of Education for Grade 10 CBC placement. Below is our complete catalog of approved subject combinations.
+                </p>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider">Required · All Learners</span>
+
+              {/* Accreditation Stats Pills */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 shrink-0">
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 text-center">
+                  <p className="text-xl font-black text-emerald-700 dark:text-emerald-400">3</p>
+                  <p className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase">Pathways</p>
+                </div>
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 text-center">
+                  <p className="text-xl font-black text-blue-700 dark:text-blue-400">{APPROVED_COMBINATIONS.length}</p>
+                  <p className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase">Combinations</p>
+                </div>
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 text-center">
+                  <p className="text-xl font-black text-emerald-700 dark:text-emerald-400">100%</p>
+                  <p className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase">Approved</p>
+                </div>
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 text-center">
+                  <p className="text-xl font-black text-purple-700 dark:text-purple-400">6</p>
+                  <p className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase">Core Subjects</p>
+                </div>
               </div>
             </div>
 
-            <div className="divide-y divide-slate-800">
-              {CORE_SUBJECTS.map((subject, i) => {
-                const Icon = subject.icon;
-                return (
-                  <div
-                    key={subject.name}
-                    className="flex items-center gap-4 px-5 sm:px-6 py-3 font-mono text-amber-300/90"
+            {/* Core Foundation Ribbon */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center space-x-2">
+                  <Compass className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                    Compulsory Core Subjects (Taken alongside any approved 3-subject combination)
+                  </span>
+                </div>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                  Total curriculum: 6 Core + 3 Pathway Subjects = 9 Subjects
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {CORE_FOUNDATION_SUBJECTS.map((subj) => (
+                  <span
+                    key={subj.code}
+                    className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-xl text-xs font-medium bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 shadow-2xs"
                   >
-                    <span className="text-xs text-slate-500 w-6 shrink-0">{String(i + 1).padStart(2, '0')}</span>
-                    <Icon className="w-4 h-4 text-amber-400 shrink-0" />
-                    <span className="text-sm sm:text-base tracking-wide uppercase flex-1">{subject.name}</span>
-                    <span className="hidden sm:inline text-[10px] text-slate-500 tracking-widest">CHECKED IN</span>
-                  </div>
-                );
-              })}
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span>{subj.name}</span>
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* BOARDING PASSES — one ticket per pathway */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {PATHWAYS.map((pathway) => {
-              const Icon = pathway.icon;
-              const groups = groupByCategory(pathway.subjects);
-
-              return (
-                <div
-                  key={pathway.id}
-                  className="relative flex flex-col sm:flex-row rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden transition-transform duration-300 hover:-translate-y-1"
-                >
-                  {/* Ink stamp */}
-                  <div
-                    className="absolute top-4 right-4 sm:top-5 sm:right-5 flex items-center gap-1 px-2.5 py-1 rounded-md border-2 -rotate-6 opacity-80 pointer-events-none"
-                    style={{ borderColor: pathway.color, color: pathway.color }}
+            {/* Filter and View Controls Toolbar */}
+            <div className="space-y-4 pt-2">
+              
+              {/* Primary Pathway Selector Tabs */}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80">
+                  <button
+                    onClick={() => { setSelectedPathway('ALL'); setSelectedTrack('ALL'); }}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                      selectedPathway === 'ALL'
+                        ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
                   >
-                    <CheckCircle className="w-3 h-3" />
-                    <span className="text-[9px] font-extrabold uppercase tracking-widest">CBC Approved</span>
-                  </div>
-
-                  {/* Stub */}
-                  <div
-                    className="sm:w-36 shrink-0 flex sm:flex-col items-center justify-between sm:justify-center gap-3 p-5 border-b sm:border-b-0 sm:border-r border-dashed border-slate-300 dark:border-slate-700 relative"
-                    style={{ backgroundColor: `${pathway.color}0d` }}
+                    All Pathways ({APPROVED_COMBINATIONS.length})
+                  </button>
+                  <button
+                    onClick={() => { setSelectedPathway('STEM'); setSelectedTrack('ALL'); }}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+                      selectedPathway === 'STEM'
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400'
+                    }`}
                   >
-                    <div
-                      className="p-3 rounded-2xl"
-                      style={{ backgroundColor: `${pathway.color}1a`, color: pathway.color }}
+                    <FlaskConical className="w-3.5 h-3.5" />
+                    <span>STEM ({stemCount})</span>
+                  </button>
+                  <button
+                    onClick={() => { setSelectedPathway('SOCIAL SCIENCES'); setSelectedTrack('ALL'); }}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+                      selectedPathway === 'SOCIAL SCIENCES'
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400'
+                    }`}
+                  >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    <span>Social Sciences ({socialCount})</span>
+                  </button>
+                  <button
+                    onClick={() => { setSelectedPathway('ARTS & SPORTS SCIENCE'); setSelectedTrack('ALL'); }}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+                      selectedPathway === 'ARTS & SPORTS SCIENCE'
+                        ? 'bg-orange-600 text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-orange-700 dark:hover:text-orange-400'
+                    }`}
+                  >
+                    <Palette className="w-3.5 h-3.5" />
+                    <span>Arts & Sports ({artsCount})</span>
+                  </button>
+                </div>
+
+                {/* View Switcher: Table vs Cards */}
+                <div className="flex items-center space-x-1 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80">
+                  <button
+                    onClick={() => setViewMode('table')}
+                    aria-label="Table view"
+                    className={`p-2 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-all ${
+                      viewMode === 'table'
+                        ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                    title="Official Table View"
+                  >
+                    <TableIcon className="w-4 h-4" />
+                    <span className="hidden sm:inline">Table View</span>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('cards')}
+                    aria-label="Cards view"
+                    className={`p-2 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-all ${
+                      viewMode === 'cards'
+                        ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                    title="Cards Grid View"
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                    <span className="hidden sm:inline">Cards View</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Sub-Filters: Track + Live Search */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                
+                {/* Track selector */}
+                <div className="sm:col-span-5 flex items-center space-x-2">
+                  <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider shrink-0">
+                    Track:
+                  </span>
+                  <select
+                    value={selectedTrack}
+                    onChange={(e) => setSelectedTrack(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    {availableTracks.map((tr) => (
+                      <option key={tr} value={tr}>
+                        {tr === 'ALL' ? 'All Tracks in View' : tr}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Search Input */}
+                <div className="sm:col-span-7 relative">
+                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600 dark:text-slate-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search by subject or code (e.g. Physics, French, ST1048, SS2008)..."
+                    className="w-full pl-10 pr-9 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-600 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-900 dark:hover:text-white"
+                      title="Clear search"
                     >
-                      <Icon className="w-7 h-7" />
-                    </div>
-                    <div className="sm:text-center">
-                      <p className="text-[10px] font-mono text-slate-400 tracking-widest">{pathway.gate}</p>
-                      <p className="text-sm font-extrabold text-slate-900 dark:text-white leading-tight">{pathway.name}</p>
-                    </div>
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
 
-                    {/* Punch-hole notches on the perforation (desktop only) */}
-                    <span className="hidden sm:block absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-emerald-50 dark:bg-slate-950" />
-                    <span className="hidden sm:block absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-emerald-50 dark:bg-slate-950" />
-                  </div>
+              </div>
 
-                  {/* Manifest */}
-                  <div className="flex-1 p-6 pt-8 sm:pt-6 flex flex-col">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Ticket className="w-4 h-4" style={{ color: pathway.color }} />
-                      <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: pathway.color }}>
-                        Destination: {pathway.destination}
-                      </p>
-                    </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-300 font-light leading-relaxed mb-5">
-                      {pathway.description}
-                    </p>
+            </div>
 
-                    <div className="space-y-4 flex-1">
-                      {groups.map(({ category, subjects }) => (
-                        <div key={category}>
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5">
-                            Class · {category}
+            {/* RESULTS COUNT & ACTIVE FILTER BADGE */}
+            <div className="flex items-center justify-between pt-1 text-xs text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center space-x-2">
+                <span>Displaying <strong>{filteredCombinations.length}</strong> of {APPROVED_COMBINATIONS.length} approved combinations</span>
+                {(selectedPathway !== 'ALL' || selectedTrack !== 'ALL' || searchQuery) && (
+                  <button
+                    onClick={() => { setSelectedPathway('ALL'); setSelectedTrack('ALL'); setSearchQuery(''); }}
+                    className="text-emerald-700 dark:text-emerald-400 hover:underline font-bold text-xs"
+                  >
+                    Reset all filters
+                  </button>
+                )}
+              </div>
+              <div className="hidden sm:flex items-center space-x-1.5 text-emerald-700 dark:text-emerald-400 font-semibold text-xs">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>All listed combinations are accredited</span>
+              </div>
+            </div>
+
+            {/* ============================================== */}
+            {/* VIEW A: OFFICIAL TABLE VIEW                     */}
+            {/* ============================================== */}
+            {viewMode === 'table' && (
+              <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-2xs">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-slate-100/90 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 uppercase font-black tracking-wider text-[11px]">
+                      <th className="py-3.5 px-4 font-bold">Pathway</th>
+                      <th className="py-3.5 px-4 font-bold">Track</th>
+                      <th className="py-3.5 px-4 font-bold">Subject Combination</th>
+                      <th className="py-3.5 px-4 font-bold text-center">Code</th>
+                      <th className="py-3.5 px-4 font-bold text-center">Status</th>
+                      <th className="py-3.5 px-4 font-bold text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                    {filteredCombinations.map((combo) => {
+                      const isStem = combo.pathway === 'STEM';
+                      const isArts = combo.pathway === 'ARTS & SPORTS SCIENCE';
+                      const isSocial = combo.pathway === 'SOCIAL SCIENCES';
+
+                      return (
+                        <tr
+                          key={combo.code}
+                          className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group"
+                        >
+                          {/* Pathway Column */}
+                          <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold ${
+                                isStem
+                                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                                  : isArts
+                                  ? 'bg-orange-100 text-orange-800 dark:bg-orange-950/60 dark:text-orange-300'
+                                  : 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300'
+                              }`}
+                            >
+                              {combo.pathway}
+                            </span>
+                          </td>
+
+                          {/* Track Column */}
+                          <td className="py-3.5 px-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                            <span className="text-[11px] px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono">
+                              {combo.track}
+                            </span>
+                          </td>
+
+                          {/* Subjects Column */}
+                          <td className="py-3.5 px-4 text-slate-900 dark:text-slate-100 font-medium">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              {combo.subjects.map((subj, idx) => (
+                                <span
+                                  key={idx}
+                                  className="inline-block px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800/90 text-slate-900 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-[11px] font-semibold"
+                                >
+                                  {subj}
+                                </span>
+                              ))}
+                            </div>
+                            {combo.recommendedCareers && (
+                              <p className="text-[10px] text-slate-600 dark:text-slate-400 mt-1 line-clamp-1 group-hover:line-clamp-none">
+                                Leads to: {combo.recommendedCareers}
+                              </p>
+                            )}
+                          </td>
+
+                          {/* Code Column */}
+                          <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                            <span className="inline-block px-2.5 py-1 rounded-lg font-mono font-bold text-xs bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-emerald-400 border border-slate-300 dark:border-slate-700">
+                              {combo.code}
+                            </span>
+                          </td>
+
+                          {/* Status Column */}
+                          <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                            <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/60">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                              <span>{combo.status}</span>
+                            </span>
+                          </td>
+
+                          {/* Action Column */}
+                          <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                            <button
+                              onClick={() => handleApplyCombo(combo.code)}
+                              className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-2xs transition-all hover:scale-105"
+                              title={`Inquire about combination ${combo.code}`}
+                            >
+                              <span>Inquire</span>
+                              <ArrowRight className="w-3 h-3" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* ============================================== */}
+            {/* VIEW B: CARDS GRID VIEW                         */}
+            {/* ============================================== */}
+            {viewMode === 'cards' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredCombinations.map((combo) => {
+                  const isStem = combo.pathway === 'STEM';
+                  const isArts = combo.pathway === 'ARTS & SPORTS SCIENCE';
+
+                  const borderColor = isStem 
+                    ? 'border-emerald-500/30 hover:border-emerald-500' 
+                    : isArts 
+                    ? 'border-orange-500/30 hover:border-orange-500' 
+                    : 'border-blue-500/30 hover:border-blue-500';
+
+                  const badgeColor = isStem
+                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                    : isArts
+                    ? 'bg-orange-100 text-orange-800 dark:bg-orange-950/60 dark:text-orange-300'
+                    : 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300';
+
+                  return (
+                    <div
+                      key={combo.code}
+                      className={`p-5 rounded-2xl bg-white dark:bg-slate-900/90 border ${borderColor} shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4`}
+                    >
+                      <div className="space-y-3">
+                        {/* Top row: Code + Status */}
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono font-black text-sm px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-emerald-400 border border-slate-300 dark:border-slate-700">
+                            {combo.code}
+                          </span>
+                          <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/60">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                            <span>{combo.status}</span>
+                          </span>
+                        </div>
+
+                        {/* Pathway + Track */}
+                        <div>
+                          <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${badgeColor}`}>
+                            {combo.pathway}
+                          </span>
+                          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 font-mono mt-1">
+                            Track: {combo.track}
                           </p>
-                          <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-                            {subjects.map((subject) => (
-                              <span key={subject.code} className="text-xs text-slate-700 dark:text-slate-200 whitespace-nowrap">
-                                <span className="font-mono text-slate-400 dark:text-slate-500 mr-1">{subject.code}</span>
-                                {subject.name}
+                        </div>
+
+                        {/* Subject chips */}
+                        <div className="space-y-1.5 pt-1">
+                          <p className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                            3 Required Subjects:
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {combo.subjects.map((subj, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700"
+                              >
+                                {subj}
                               </span>
                             ))}
                           </div>
                         </div>
-                      ))}
-                    </div>
 
-                    {/* Barcode footer */}
-                    <div className="mt-6 pt-4 border-t border-dashed border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
-                      <div
-                        className="h-6 flex-1 max-w-[160px] opacity-70"
-                        style={{
-                          backgroundImage:
-                            'repeating-linear-gradient(90deg, currentColor 0 2px, transparent 2px 5px)',
-                          color: pathway.color,
-                        }}
-                      />
-                      <span className="text-[10px] font-mono text-slate-400 tracking-widest">
-                        {pathway.gate}-{pathway.subjects.length}SUBJ
-                      </span>
+                        {/* Career guidance */}
+                        {combo.recommendedCareers && (
+                          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 text-[11px] text-slate-600 dark:text-slate-400">
+                            <span className="font-bold text-slate-800 dark:text-slate-200">Career Targets:</span> {combo.recommendedCareers}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Inquire button */}
+                      <button
+                        onClick={() => handleApplyCombo(combo.code)}
+                        className="w-full flex items-center justify-center space-x-2 py-2.5 rounded-xl bg-slate-900 hover:bg-emerald-700 text-white dark:bg-slate-800 dark:hover:bg-emerald-600 font-bold text-xs transition-colors shadow-2xs"
+                      >
+                        <span>Inquire for Combination {combo.code}</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-                  </div>
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Empty State */}
+            {filteredCombinations.length === 0 && (
+              <div className="p-12 text-center rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+                <Search className="w-8 h-8 text-slate-400 mx-auto" />
+                <h4 className="text-base font-bold text-slate-800 dark:text-slate-200">No matching approved combinations found</h4>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  Try searching for a different subject (e.g. "Physics", "Computer Studies", "French") or reset the pathway and track filters.
+                </p>
+                <button
+                  onClick={() => { setSelectedPathway('ALL'); setSelectedTrack('ALL'); setSearchQuery(''); }}
+                  className="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs"
+                >
+                  Reset all filters
+                </button>
+              </div>
+            )}
+
           </div>
+
         </div>
 
-        {/* FAQ Accordion Section */}
+        {/* ======================================================== */}
+        {/* SECTION 3: FREQUENTLY ASKED QUESTIONS (FAQ) ACCORDION     */}
+        {/* ======================================================== */}
         <div className="max-w-4xl mx-auto pt-8 border-t border-slate-200 dark:border-slate-800">
           
           <div className="text-center mb-8 space-y-2">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase">
               <HelpCircle className="w-4 h-4" />
               <span>Frequently Asked Questions</span>
             </div>
-            <h3 className="text-2xl sm:text-3xl font-bold">Admissions & General Enquiries</h3>
+            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Admissions & General Enquiries</h3>
           </div>
 
           {/* Category Filter Pills */}
           <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
-            {categories.map((cat) => (
+            {faqCategories.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setSelectedCategory(cat)}
+                onClick={() => setSelectedFaqCategory(cat)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                  selectedCategory === cat
-                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  selectedFaqCategory === cat
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
                 }`}
               >
                 {cat}
@@ -410,15 +659,15 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({ faqs }) => {
           {/* Accordion List */}
           <div className="space-y-4">
             {filteredFaqs.map((faq) => {
-              const isOpen = openId === faq.id;
+              const isOpen = openFaqId === faq.id;
               return (
                 <div
                   key={faq.id}
-                  className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900 shadow-sm transition-all"
+                  className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900 shadow-2xs transition-all"
                 >
                   <button
                     onClick={() => toggleFAQ(faq.id)}
-                    className="w-full flex items-center justify-between p-5 text-left font-semibold text-base text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-700 dark:text-emerald-400 focus:outline-none"
+                    className="w-full flex items-center justify-between p-5 text-left font-semibold text-base text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 focus:outline-none"
                   >
                     <span className="pr-4">{faq.question}</span>
                     <ChevronDown className={`w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />

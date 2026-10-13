@@ -17,17 +17,17 @@ export const Leadership: React.FC<LeadershipProps> = ({ profiles }) => {
   // --- Shared style helpers (removes repeated / conflicting Tailwind strings) ---
 
   const arrowButtonClasses =
-    'p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-emerald-500 hover:text-white dark:hover:text-white transition-colors';
+    'p-3 rounded-xl bg-slate-100 dark:bg-[#142017] text-[#161311] dark:text-[#F3F0E9] border border-[#E5DFD2] dark:border-[#1E2A24] hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-600 dark:hover:text-white transition-colors';
 
   const getThumbnailClasses = (isSelected: boolean) => {
     const base = 'p-4 rounded-2xl text-left border transition-all shadow-sm';
     return isSelected
-      ? `${base} bg-white dark:bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400`
-      : `${base} bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 hover:border-emerald-300`;
+      ? `${base} bg-white dark:bg-emerald-500/15 border-emerald-500 text-emerald-700 dark:text-emerald-400`
+      : `${base} bg-white dark:bg-[#0F1811] border-[#E5DFD2] dark:border-[#1E2A24] text-[#161311] dark:text-[#F3F0E9] hover:border-emerald-400`;
   };
 
   return (
-    <section id="leadership" className="py-20 relative bg-white dark:bg-slate-950 transition-colors overflow-hidden">
+    <section id="leadership" className="py-20 relative bg-[#FAF7F2] dark:bg-[#080D0B] text-[#161311] dark:text-[#F3F0E9] transition-colors overflow-hidden">
 
       {/* Background Subtle Highlights */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
@@ -37,20 +37,20 @@ export const Leadership: React.FC<LeadershipProps> = ({ profiles }) => {
 
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
             <ShieldCheck className="w-4 h-4" />
             <span>School Administration</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#161311] dark:text-[#F3F0E9] tracking-tight">
             Visionary School Leadership
           </h2>
-          <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg">
+          <p className="text-[#5B5346] dark:text-[#A8A196] text-base sm:text-lg">
             Guiding St. Teresa Gatura Girls with faith, integrity, academic rigour, and a steadfast devotion to student success.
           </p>
         </div>
 
         {/* Featured Leader Card */}
-        <div className="relative rounded-3xl bg-white dark:bg-slate-900/90 text-slate-900 dark:text-white p-6 sm:p-10 lg:p-12 border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden mb-12">
+        <div className="relative rounded-3xl bg-white dark:bg-[#0F1811] text-[#161311] dark:text-[#F3F0E9] p-6 sm:p-10 lg:p-12 border border-[#E5DFD2] dark:border-[#1E2A24] shadow-sm overflow-hidden mb-12">
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
 
@@ -81,26 +81,23 @@ export const Leadership: React.FC<LeadershipProps> = ({ profiles }) => {
                   {currentLeader.role}
                 </span>
                 {/* FIX: was hardcoded text-white with no light-mode color — invisible on the white card */}
-                <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+                <h3 className="text-2xl sm:text-3xl font-extrabold text-[#161311] dark:text-[#F3F0E9]">
                   {currentLeader.name}
                 </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                <p className="text-sm text-[#5B5346] dark:text-[#A8A196] font-medium">
                   {currentLeader.title}
                 </p>
               </div>
 
               {/* Quote box */}
-              {/* FIX: bg-white/5 + border-white/10 read fine on a dark card but are nearly invisible on a white one */}
-              <div className="relative p-6 rounded-2xl bg-slate-900/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-md space-y-3">
+              <div className="relative p-6 rounded-2xl bg-slate-900/5 dark:bg-[#142017] border border-[#E5DFD2] dark:border-[#1E2A24] backdrop-blur-md space-y-3">
                 <Quote className="w-8 h-8 text-emerald-700 dark:text-emerald-400 opacity-80" />
-                {/* FIX: hardcoded text-slate-200 (light gray) had no light-mode color */}
-                <p className="text-base sm:text-lg italic text-slate-700 dark:text-slate-200 leading-relaxed">
+                <p className="text-base sm:text-lg italic text-[#161311] dark:text-[#F3F0E9] leading-relaxed">
                   "{currentLeader.quote}"
                 </p>
               </div>
 
-              {/* FIX: hardcoded text-slate-300 had no light-mode color */}
-              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-light">
+              <p className="text-sm sm:text-base text-[#5B5346] dark:text-[#A8A196] leading-relaxed font-light">
                 {currentLeader.bio}
               </p>
 
@@ -109,9 +106,8 @@ export const Leadership: React.FC<LeadershipProps> = ({ profiles }) => {
           </div>
 
           {/* Navigation Arrows for Leaders */}
-          {/* FIX: border-slate-800 was hardcoded (always-dark), invisible against the white card in light mode */}
-          <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
-            <div className="text-xs text-slate-500 dark:text-slate-400 font-medium" aria-live="polite">
+          <div className="flex justify-between items-center mt-8 pt-6 border-t border-[#E5DFD2] dark:border-[#1E2A24]">
+            <div className="text-xs text-[#5B5346] dark:text-[#A8A196] font-medium" aria-live="polite">
               Profile {selectedIndex + 1} of {sortedProfiles.length}
             </div>
             <div className="flex space-x-3">

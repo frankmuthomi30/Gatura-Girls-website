@@ -22,7 +22,6 @@ interface NavbarProps {
   activeSection: string;
   setActiveSection: (section: string) => void;
   onOpenAdmin: () => void;
-  onOpenAdmissions: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -31,7 +30,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeSection,
   setActiveSection,
   onOpenAdmin,
-  onOpenAdmissions
 }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -70,28 +68,28 @@ export const Navbar: React.FC<NavbarProps> = ({
       'flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-200';
 
     if (isActive) {
-      return `${base} bg-emerald-500 text-white shadow-md shadow-emerald-500/30`;
+      return `${base} bg-emerald-600 text-white shadow-md shadow-emerald-600/30`;
     }
 
-    return `${base} text-slate-700 hover:text-emerald-600 hover:bg-black/5 dark:text-slate-200 dark:hover:text-emerald-400 dark:hover:bg-white/10`;
+    return `${base} text-[#5B5346] hover:text-emerald-700 hover:bg-black/5 dark:text-[#A8A196] dark:hover:text-[#F3F0E9] dark:hover:bg-emerald-500/10`;
   };
 
   // Round icon-only utility button (theme toggle, admin login)
   const getIconButtonClasses = () =>
-    `p-2.5 rounded-xl border transition-all text-slate-700 hover:text-emerald-600 hover:bg-black/5 border-slate-200 dark:text-slate-200 dark:hover:text-emerald-400 dark:hover:bg-white/10 dark:border-slate-700 ${
-      scrolled ? 'bg-slate-100 dark:bg-slate-800' : 'bg-black/5 dark:bg-white/10'
+    `p-2.5 rounded-xl border transition-all text-[#161311] hover:text-emerald-600 hover:bg-black/5 border-[#E5DFD2] dark:text-[#F3F0E9] dark:hover:text-emerald-400 dark:hover:bg-emerald-500/10 dark:border-[#1E2A24] ${
+      scrolled ? 'bg-slate-100 dark:bg-[#0F1811]' : 'bg-black/5 dark:bg-[#0F1811]/80'
     }`;
 
   const mobileNavLinkClasses =
-    'flex items-center justify-between w-full px-4 py-3 rounded-xl transition-colors text-left font-medium text-slate-700 hover:text-emerald-600 hover:bg-emerald-500/10 dark:text-slate-200 dark:hover:text-emerald-400';
+    'flex items-center justify-between w-full px-4 py-3 rounded-xl transition-colors text-left font-medium text-[#161311] hover:text-emerald-600 hover:bg-emerald-500/10 dark:text-[#F3F0E9] dark:hover:text-emerald-400';
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 
       ${
         scrolled
-          ? 'backdrop-blur-xl bg-white/85 dark:bg-slate-900/85 shadow-sm border-b border-emerald-500/20 py-3'
-          : 'bg-gradient-to-b from-white/90 dark:from-slate-900/80 to-transparent py-4 backdrop-blur-sm'
+          ? 'backdrop-blur-xl bg-white/90 dark:bg-[#080D0B]/90 shadow-sm border-b border-[#E5DFD2] dark:border-[#1E2A24] py-3'
+          : 'bg-gradient-to-b from-white/95 dark:from-[#080D0B]/95 to-transparent py-4 backdrop-blur-sm'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -116,11 +114,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
             <div className="flex flex-col">
               {/* FIX: was missing a text color entirely, so it inherited an invisible color in desktop light mode */}
-              <span className="font-bold text-lg leading-snug tracking-tight transition-colors text-slate-900 dark:text-white">
+              <span className="font-bold text-lg leading-snug tracking-tight transition-colors text-[#161311] dark:text-[#F3F0E9]">
                 St. Teresa Gatura Girls
               </span>
               <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold uppercase tracking-wider">
-                Senior School • 8-4-4 & CBC
+                Senior Secondary School • CBC Grade 10–12
               </span>
             </div>
           </div>
@@ -128,7 +126,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Desktop Navigation Links */}
           <nav
             aria-label="Primary"
-            className="hidden lg:flex items-center space-x-1 bg-white/10 dark:bg-slate-800/40 backdrop-blur-md p-1.5 rounded-full border border-white/20 dark:border-slate-700/50 shadow-inner"
+            className="hidden lg:flex items-center space-x-1 bg-white/40 dark:bg-[#0F1811]/90 backdrop-blur-md p-1.5 rounded-full border border-[#E5DFD2] dark:border-[#1E2A24] shadow-inner"
           >
             {navLinks.map((link) => {
               const Icon = link.icon;
@@ -149,14 +147,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Action Buttons */}
           <div className="hidden sm:flex items-center space-x-3">
-            {/* Admissions Button */}
-            <button
-              onClick={onOpenAdmissions}
-              className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold text-sm shadow-md shadow-emerald-500/25 hover:shadow-sm hover:scale-105 transition-all"
+            {/* Contact School Button */}
+            <a
+              href="#contact"
+              className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold text-sm shadow-md shadow-emerald-500/25 hover:shadow-sm hover:scale-105 transition-all"
             >
-              <UserCheck className="w-4 h-4" />
-              <span>Admissions Portal</span>
-            </button>
+              <PhoneCall className="w-4 h-4" />
+              <span>Contact Us</span>
+            </a>
 
             {/* Dark Mode Toggle */}
             <button
@@ -204,15 +202,15 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Mobile Glassmorphic Drawer Menu */}
       {mobileMenuOpen && (
         <div id="mobile-nav-drawer" className="lg:hidden mt-3 px-4 pb-6 pt-2">
-          <div className="backdrop-blur-2xl bg-white/95 dark:bg-slate-900/98 rounded-2xl p-5 border border-slate-200 dark:border-emerald-500/30 shadow-md text-slate-900 dark:text-white space-y-3">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+          <div className="backdrop-blur-2xl bg-white/95 dark:bg-[#080D0B]/98 rounded-2xl p-5 border border-[#E5DFD2] dark:border-[#1E2A24] shadow-md text-[#161311] dark:text-[#F3F0E9] space-y-3">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E5DFD2] dark:border-[#1E2A24]">
               <span className="text-xs uppercase font-bold text-emerald-700 dark:text-emerald-400 tracking-wider">
                 Navigation Menu
               </span>
               <button
                 onClick={() => setMobileMenuOpen(false)}
                 aria-label="Close navigation menu"
-                className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                className="text-slate-600 hover:text-slate-900 dark:text-[#A8A196] dark:hover:text-[#F3F0E9]"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -233,23 +231,21 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <Icon className="w-5 h-5 text-emerald-700 dark:text-emerald-400" />
                       <span>{link.label}</span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-[#A8A196]" />
                   </button>
                 );
               })}
             </nav>
 
-            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenAdmissions();
-                }}
-                className="w-full flex items-center justify-center space-x-2 py-3 rounded-xl bg-emerald-500 text-white font-semibold shadow-sm shadow-emerald-500/30"
+            <div className="pt-3 border-t border-[#E5DFD2] dark:border-[#1E2A24] space-y-2">
+              <a
+                href="#contact"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center justify-center space-x-2 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-sm shadow-emerald-500/30"
               >
-                <UserCheck className="w-5 h-5" />
-                <span>Online Admissions Portal</span>
-              </button>
+                <PhoneCall className="w-5 h-5" />
+                <span>Contact Administration</span>
+              </a>
 
               <button
                 onClick={() => {
@@ -257,7 +253,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onOpenAdmin();
                 }}
                 aria-label="Admin portal login"
-                className="w-full flex items-center justify-center space-x-2 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-medium hover:bg-slate-200 dark:hover:bg-slate-700 text-sm"
+                className="w-full flex items-center justify-center space-x-2 py-2.5 rounded-xl bg-slate-100 dark:bg-[#0F1811] text-[#161311] dark:text-[#F3F0E9] border border-transparent dark:border-[#1E2A24] font-medium hover:bg-slate-200 dark:hover:bg-[#142017] text-sm"
               >
                 <ShieldCheck className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                 <span>Admin Portal Login</span>

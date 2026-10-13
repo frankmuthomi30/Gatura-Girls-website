@@ -1,12 +1,13 @@
 import React from 'react';
 import { Users, Award, BookOpenCheck, ShieldCheck, MapPin, Sparkles } from 'lucide-react';
+import { APPROVED_COMBINATIONS } from '../data/approvedPathways';
 
 export const QuickStats: React.FC = () => {
   const stats = [
     {
       label: 'Enrolled Students',
       value: '850+',
-      description: 'Bright young girls across 8-4-4 & CBC pathways',
+      description: 'Bright young girls across approved CBC Senior Pathways',
       icon: Users,
       color: 'from-emerald-500 to-teal-500'
     },
@@ -18,9 +19,9 @@ export const QuickStats: React.FC = () => {
       color: 'from-teal-500 to-cyan-500'
     },
     {
-      label: 'Curriculum Systems',
-      value: '8-4-4 & CBC',
-      description: 'Fully equipped for Senior Secondary Pathways',
+      label: 'Approved CBC Combinations',
+      value: `${APPROVED_COMBINATIONS.length} Approved`,
+      description: 'Across STEM, Social Sciences & Sports tracks',
       icon: BookOpenCheck,
       color: 'from-emerald-600 to-emerald-400'
     },
@@ -34,7 +35,7 @@ export const QuickStats: React.FC = () => {
   ];
 
   return (
-    <section className="py-12 bg-white dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800 transition-colors">
+    <section className="py-12 bg-[#FAF7F2] dark:bg-[#080D0B] border-y border-[#E5DFD2] dark:border-[#1E2A24] transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, idx) => {
@@ -42,24 +43,24 @@ export const QuickStats: React.FC = () => {
             return (
               <div 
                 key={idx}
-                className="relative p-6 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 shadow-sm dark:shadow-none backdrop-blur-md hover:border-emerald-500/40 hover:scale-[1.02] transition-all group"
+                className="relative p-6 rounded-2xl bg-white dark:bg-[#0F1811] border border-[#E5DFD2] dark:border-[#1E2A24] shadow-sm dark:shadow-none backdrop-blur-md hover:border-emerald-500/40 hover:scale-[1.02] transition-all group"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} text-white flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-110 transition-transform`}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full">
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full">
                     Gatura Girls
                   </span>
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                  <h3 className="text-3xl font-black text-[#161311] dark:text-[#F3F0E9] tracking-tight">
                     {stat.value}
                   </h3>
-                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                  <p className="text-sm font-semibold text-[#161311] dark:text-[#F3F0E9]">
                     {stat.label}
                   </p>
-                  <p className="text-xs text-slate-600 dark:text-slate-500 dark:text-slate-400 leading-relaxed">
+                  <p className="text-xs text-[#5B5346] dark:text-[#A8A196] leading-relaxed">
                     {stat.description}
                   </p>
                 </div>

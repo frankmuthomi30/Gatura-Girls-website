@@ -49,12 +49,12 @@ export const WeatherLocation: React.FC = () => {
   });
   const [loadingWeather, setLoadingWeather] = useState(false);
 
-  // Fetch real weather data for Gatura (-0.835, 36.953) using Open-Meteo API
+  // Fetch real weather data for Gatura (-0.859845, 36.860207) using Open-Meteo API
   const fetchGaturaWeather = async () => {
     setLoadingWeather(true);
     try {
       const res = await fetch(
-        'https://api.open-meteo.com/v1/forecast?latitude=-0.835&longitude=36.953&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,cloud_cover,is_day&hourly=precipitation_probability'
+        'https://api.open-meteo.com/v1/forecast?latitude=-0.859845&longitude=36.860207&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,cloud_cover,is_day&hourly=precipitation_probability'
       );
       if (res.ok) {
         const data = await res.json();
@@ -361,24 +361,29 @@ export const WeatherLocation: React.FC = () => {
 
             <iframe
               title="St. Teresa Gatura Girls Senior School Google Map"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31917.84880942006!2d36.935000!3d-0.835000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f42a5a5a5a5a5%3A0x5a5a5a5a5a5a5a5a!2sGatura%2C%20Kenya!5e0!3m2!1sen!2ske!4v1700000000000!5m2!1sen!2ske"
+              src="https://maps.google.com/maps?q=-0.859845,36.860207&hl=en&z=16&output=embed"
               className="w-full h-full border-0 filter grayscale-[20%] contrast-[110%] group-hover:grayscale-0 transition-all duration-500"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
 
             {/* Floating Overlay Badge on Map */}
-            <div className={`absolute top-4 left-4 p-4 rounded-2xl ${glassPanel} text-slate-900 dark:text-white max-w-xs space-y-1`}>
+            <div className={`absolute top-4 left-4 p-4 rounded-2xl ${glassPanel} text-slate-900 dark:text-white max-w-xs space-y-1.5`}>
               <div className="flex items-center space-x-2 text-emerald-700 dark:text-emerald-400 font-bold text-xs uppercase">
                 <MapPin className="w-4 h-4" />
                 <span>Pinned Location</span>
               </div>
               <h4 className="font-bold text-sm text-slate-900 dark:text-white">St. Teresa Gatura Girls Senior School</h4>
               <p className="text-xs text-slate-600 dark:text-slate-300">Gatura Town, Gatanga, Murang'a County</p>
+              <div className="pt-1 border-t border-slate-200/60 dark:border-white/10">
+                <p className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 font-semibold">
+                  Coordinates: -0.859845, 36.860207
+                </p>
+              </div>
             </div>
 
             <a
-              href="https://maps.app.goo.gl/oq7iHDB4f6vS2P868"
+              href="https://www.google.com/maps?q=-0.859845,36.860207"
               target="_blank"
               rel="noopener noreferrer"
               className="absolute bottom-4 right-4 px-4 py-2.5 rounded-xl bg-emerald-700/90 backdrop-blur-md hover:bg-emerald-800 text-white font-bold text-xs shadow-xl flex items-center space-x-2 transition-transform hover:scale-105"

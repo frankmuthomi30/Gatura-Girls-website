@@ -12,10 +12,9 @@ import {
 
 interface FooterProps {
   onOpenAdmin: () => void;
-  onOpenAdmissions: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenAdmissions }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -39,7 +38,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenAdmissions })
               </div>
               <div>
                 <h3 className="font-extrabold text-xl text-slate-900 dark:text-white tracking-tight">St. Teresa Gatura Girls</h3>
-                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">Senior Secondary School • 8-4-4 & CBC</p>
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">Senior Secondary School • CBC Grade 10–12</p>
               </div>
             </div>
 
@@ -48,15 +47,15 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenAdmissions })
             </p>
 
             <div className="pt-2 flex items-center space-x-3">
-              <button
-                onClick={onOpenAdmissions}
-                className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white dark:text-slate-950 font-bold text-xs shadow-md shadow-emerald-500/20"
+              <a
+                href="#contact"
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20"
               >
-                Apply For Admission
-              </button>
+                Contact School
+              </a>
               <button
                 onClick={onOpenAdmin}
-                className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 dark:hover:border-emerald-500 text-slate-600 dark:text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-white text-xs font-semibold transition-colors"
+                className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 dark:hover:border-emerald-500 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-white text-xs font-semibold transition-colors"
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span>Admin Login</span>
@@ -68,12 +67,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenAdmissions })
           <div className="lg:col-span-3 space-y-3">
             <h4 className="text-xs font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Quick Navigation</h4>
             <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-              <li><a href="#hero" className="hover:text-emerald-600 dark:hover:text-emerald-700 dark:text-emerald-400 transition-colors">Home & Highlights</a></li>
-              <li><a href="#about" className="hover:text-emerald-600 dark:hover:text-emerald-700 dark:text-emerald-400 transition-colors">8-4-4 & CBC Senior Pathways</a></li>
-              <li><a href="#location" className="hover:text-emerald-600 dark:hover:text-emerald-700 dark:text-emerald-400 transition-colors">Location, Map & Live Weather</a></li>
-              <li><a href="#gallery" className="hover:text-emerald-600 dark:hover:text-emerald-700 dark:text-emerald-400 transition-colors">Campus Photo Gallery</a></li>
-              <li><a href="#news" className="hover:text-emerald-600 dark:hover:text-emerald-700 dark:text-emerald-400 transition-colors">News Noticeboard & Career Vacancies</a></li>
-              <li><a href="#contact" className="hover:text-emerald-600 dark:hover:text-emerald-700 dark:text-emerald-400 transition-colors">Contact Administration</a></li>
+              <li><a href="#hero" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Home & Highlights</a></li>
+              <li><a href="#about" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">CBC Senior Pathways & Combinations</a></li>
+              <li><a href="#location" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Location, Map & Live Weather</a></li>
+              <li><a href="#gallery" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Campus Photo Gallery</a></li>
+              <li><a href="#news" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">News Noticeboard & Career Vacancies</a></li>
+              <li><a href="#contact" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Contact Administration</a></li>
             </ul>
           </div>
 
@@ -86,7 +85,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenAdmissions })
                 <span>
                   Gatura, Gatanga Sub-County, P.O. Box 30-01013 Gatura, Murang'a County, Kenya{' '}
                   <a 
-                    href="https://maps.app.goo.gl/oq7iHDB4f6vS2P868" 
+                    href="https://www.google.com/maps?q=-0.859845,36.860207" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center space-x-0.5 ml-1"
@@ -109,11 +108,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenAdmissions })
         </div>
 
         {/* Bottom Strip */}
-        <div className="pt-8 border-t border-slate-200 dark:border-slate-900 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-600 dark:text-slate-600 gap-4">
+        <div className="pt-8 border-t border-slate-200 dark:border-slate-900 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-600 dark:text-slate-400 gap-4">
           <p>© {new Date().getFullYear()} St. Teresa Gatura Girls Senior School. All Rights Reserved.</p>
           
           <div className="flex items-center space-x-4">
-            <span className="text-slate-600 dark:text-slate-500 dark:text-slate-400">8-4-4 & CBC Accredited</span>
+            <span className="text-slate-600 dark:text-slate-400">MoE & KICD CBC Accredited</span>
             <button
               onClick={scrollToTop}
               className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-emerald-500 hover:text-white dark:hover:text-slate-950 transition-colors"

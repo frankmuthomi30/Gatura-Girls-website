@@ -145,7 +145,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [newLeader, setNewLeader] = useState({ name: '', role: '', title: '', bio: '', quote: '', imageUrl: '' });
   const [newNews, setNewNews] = useState({ title: '', excerpt: '', content: '', category: 'Academics', imageUrl: '' });
   const [newJob, setNewJob] = useState({ title: '', department: '', employmentType: 'Full-time', deadline: '', description: '', requirementsStr: '' });
-  const [newBanner, setNewBanner] = useState({ title: '', subtitle: '', imageUrl: '', ctaText: 'Apply Now', ctaLink: '#admissions' });
+  const [newBanner, setNewBanner] = useState({ title: '', subtitle: '', imageUrl: '', ctaText: 'Explore Pathways', ctaLink: '#about' });
   const [newGallery, setNewGallery] = useState({ title: '', category: 'Academics', imageUrl: '', caption: '' });
 
   // Cloudinary State & Gallery Editing State
@@ -605,7 +605,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     } catch (err) {
       console.log('Firestore offline mode fallback');
     }
-    setNewBanner({ title: '', subtitle: '', imageUrl: '', ctaText: 'Apply Now', ctaLink: '#admissions' });
+    setNewBanner({ title: '', subtitle: '', imageUrl: '', ctaText: 'Explore Pathways', ctaLink: '#about' });
     showToast('Promotional banner added!');
   };
 
@@ -835,30 +835,30 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950/90 backdrop-blur-xl animate-fade-in overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 dark:bg-slate-950/80 backdrop-blur-md animate-fade-in overflow-y-auto">
       {/* Floating Toast Notification */}
       {toastMsg && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl bg-emerald-600 text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center space-x-2 animate-bounce border border-emerald-400">
-          <CheckCircle2 className="w-5 h-5 text-slate-950 shrink-0" />
+          <CheckCircle2 className="w-5 h-5 text-white shrink-0" />
           <span>{toastMsg}</span>
         </div>
       )}
 
       {/* Custom Confirmation Modal (iframe safe, no browser popup blocking) */}
       {confirmModal && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950/90 backdrop-blur-md animate-fade-in">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/60 dark:bg-slate-950/80 backdrop-blur-md animate-fade-in">
           <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-red-500/40 rounded-3xl p-6 space-y-5 shadow-md relative">
-            <div className="flex items-center space-x-3 text-red-400">
+            <div className="flex items-center space-x-3 text-red-500 dark:text-red-400">
               <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/20 shrink-0">
                 <Trash2 className="w-6 h-6 text-red-500" />
               </div>
               <div>
                 <h3 className="text-base font-extrabold text-slate-900 dark:text-white">{confirmModal.title}</h3>
-                <p className="text-xs text-slate-600 dark:text-slate-500 dark:text-slate-400 font-medium">Please confirm this action</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">Please confirm this action</p>
               </div>
             </div>
 
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-300 dark:border-slate-800">
+            <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-300 dark:border-slate-800">
               {confirmModal.message}
             </p>
 
@@ -866,7 +866,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <button
                 type="button"
                 onClick={() => setConfirmModal(null)}
-                className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold transition-colors"
+                className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors"
               >
                 Cancel
               </button>
@@ -878,7 +878,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   setConfirmModal(null);
                   await action();
                 }}
-                className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-slate-900 dark:text-white text-xs font-extrabold shadow-sm shadow-red-600/30 transition-all"
+                className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold shadow-sm shadow-red-600/30 transition-all"
               >
                 {confirmModal.actionLabel || 'Confirm Delete'}
               </button>
@@ -990,18 +990,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
             {/* CLOUDINARY CONFIGURATION SETTINGS PANEL */}
             {(showCloudinaryConfig || !cloudinaryConfig.cloudName) && (
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-950/60 to-slate-900 border border-blue-500/30 space-y-4 shadow-xl animate-fade-in">
-                <div className="flex items-center justify-between border-b border-blue-500/20 pb-3">
+              <div className="p-5 rounded-2xl bg-blue-50/80 dark:bg-gradient-to-br dark:from-blue-950/60 dark:to-slate-900 border border-blue-200 dark:border-blue-500/30 space-y-4 shadow-xl animate-fade-in">
+                <div className="flex items-center justify-between border-b border-blue-200 dark:border-blue-500/20 pb-3">
                   <div className="flex items-center space-x-2.5">
-                    <Cloud className="w-5 h-5 text-blue-400" />
+                    <Cloud className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     <h4 className="font-bold text-sm text-slate-900 dark:text-white">Cloudinary Image CDN Settings</h4>
-                    <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-bold">Photo Gallery Engine</span>
+                    <span className="px-2 py-0.5 rounded-full bg-blue-500/10 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-[10px] font-bold">Photo Gallery Engine</span>
                   </div>
                   {cloudinaryConfig.cloudName && (
                     <button
                       type="button"
                       onClick={() => setShowCloudinaryConfig(false)}
-                      className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white"
+                      className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -1010,34 +1010,34 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 <form onSubmit={handleSaveCloudinarySettings} className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                   <div className="sm:col-span-5 space-y-1">
-                    <label className="text-xs font-bold text-blue-200">Cloudinary Cloud Name *</label>
+                    <label className="text-xs font-bold text-blue-900 dark:text-blue-200">Cloudinary Cloud Name *</label>
                     <input
                       type="text"
                       required
                       placeholder="e.g. gaturagirls or dxyz123"
                       value={cloudinaryConfig.cloudName}
                       onChange={(e) => setCloudinaryConfig({ ...cloudinaryConfig, cloudName: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-blue-500/30 text-slate-900 dark:text-white text-xs focus:border-blue-400"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-blue-300 dark:border-blue-500/30 text-slate-900 dark:text-white text-xs focus:border-blue-500"
                     />
-                    <p className="text-[10px] text-slate-600 dark:text-slate-500 dark:text-slate-400">Found in your Cloudinary Dashboard under Account Details.</p>
+                    <p className="text-[10px] text-slate-600 dark:text-slate-400">Found in your Cloudinary Dashboard under Account Details.</p>
                   </div>
 
                   <div className="sm:col-span-4 space-y-1">
-                    <label className="text-xs font-bold text-blue-200">Unsigned Upload Preset</label>
+                    <label className="text-xs font-bold text-blue-900 dark:text-blue-200">Unsigned Upload Preset</label>
                     <input
                       type="text"
                       placeholder="ml_default or school_gallery"
                       value={cloudinaryConfig.uploadPreset}
                       onChange={(e) => setCloudinaryConfig({ ...cloudinaryConfig, uploadPreset: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-blue-500/30 text-slate-900 dark:text-white text-xs focus:border-blue-400"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-blue-300 dark:border-blue-500/30 text-slate-900 dark:text-white text-xs focus:border-blue-500"
                     />
-                    <p className="text-[10px] text-slate-600 dark:text-slate-500 dark:text-slate-400">Set up under Settings → Upload → Upload Presets (Unsigned).</p>
+                    <p className="text-[10px] text-slate-600 dark:text-slate-400">Set up under Settings → Upload → Upload Presets (Unsigned).</p>
                   </div>
 
                   <div className="sm:col-span-3 flex items-end">
                     <button
                       type="submit"
-                      className="w-full py-2.5 px-4 rounded-xl bg-blue-500 hover:bg-blue-600 text-slate-900 dark:text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-sm shadow-blue-500/20"
+                      className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-sm shadow-blue-500/20"
                     >
                       <Check className="w-4 h-4" />
                       <span>Save Cloudinary Settings</span>
@@ -1315,7 +1315,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         <button
                           type="button"
                           onClick={() => setPreviewVideoId(extractYouTubeVideoId(videoForm.youtubeUrl))}
-                          className="px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center space-x-1.5 border border-slate-200 dark:border-slate-700"
+                          className="px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center space-x-1.5 border border-slate-200 dark:border-slate-700"
                         >
                           <Eye className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                           <span>Preview</span>
@@ -1772,8 +1772,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   <div className="flex items-center space-x-2 shrink-0">
                     <label className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl cursor-pointer font-bold text-xs transition-all shadow-sm ${
                       isCloudinaryUploading
-                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 cursor-not-allowed'
-                        : 'bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white shadow-blue-600/20'
+                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20'
                     }`}>
                       {isCloudinaryUploading ? (
                         <>
@@ -2014,7 +2014,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteGallery(g.id)}
-                                  className="p-1 rounded bg-red-600/80 hover:bg-red-600 text-slate-900 dark:text-white"
+                                  className="p-1 rounded bg-red-600 hover:bg-red-700 text-white"
                                   title="Delete Photo"
                                 >
                                   <Trash2 className="w-3 h-3" />
@@ -2387,7 +2387,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           <button
                             type="button"
                             onClick={() => handleDeleteJob(job.id)}
-                            className="p-1 rounded bg-red-600/80 hover:bg-red-600 text-slate-900 dark:text-white ml-2"
+                            className="p-1 rounded bg-red-600 hover:bg-red-700 text-white ml-2"
                             title="Delete Career Vacancy"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -2414,18 +2414,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-bold text-emerald-700 dark:text-emerald-400">{msg.name} ({msg.email} • {msg.phone || 'No Phone'})</span>
                         <div className="flex items-center space-x-2">
-                          <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-500 dark:text-slate-400 text-[10px]">{msg.subject || 'General'}</span>
+                          <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px]">{msg.subject || 'General'}</span>
                           <button
                             type="button"
                             onClick={() => handleDeleteMessage(msg.id)}
-                            className="p-1 rounded bg-red-600/80 hover:bg-red-600 text-slate-900 dark:text-white ml-2"
+                            className="p-1 rounded bg-red-600 hover:bg-red-700 text-white ml-2"
                             title="Delete Contact Inquiry"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
-                      <p className="text-sm text-slate-200">{msg.message}</p>
+                      <p className="text-sm text-slate-800 dark:text-slate-200">{msg.message}</p>
                     </div>
                   ))
                 )}
