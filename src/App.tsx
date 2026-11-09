@@ -7,7 +7,7 @@ import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { BannerSlider } from './components/BannerSlider';
 import { QuickStats } from './components/QuickStats';
-import { ValuesMarquee } from './components/ValuesMarquee';
+import { AdmissionsStrip } from './components/AdmissionsStrip';
 import { Leadership } from './components/Leadership';
 import { FAQAccordion } from './components/FAQAccordion';
 import { WeatherLocation } from './components/WeatherLocation';
@@ -17,6 +17,7 @@ import { ContactForm } from './components/ContactForm';
 import { SchoolVideos } from './components/SchoolVideos';
 import { AdminPanel } from './components/AdminPanel';
 import { Footer } from './components/Footer';
+import { JourneyLoader } from './components/JourneyLoader';
 import { INITIAL_FAQS, INITIAL_LINKS } from './data/initialData';
 import { FAQItem, UsefulLink } from './types';
 import { useAppData } from './hooks/useAppData';
@@ -86,7 +87,36 @@ export default function App() {
       observer.observe(section);
     });
 
-    return () => observer.disconnect();
+    // A fast scroll can jump past a section between frames, so the observer never
+    // sees it intersect. Reveal anything at or above the viewport bottom as a fallback.
+    let ticking = false;
+    const revealPassed = () => {
+      ticking = false;
+      sections.forEach((section) => {
+        if (
+          !section.classList.contains('is-visible') &&
+          section.getBoundingClientRect().top < window.innerHeight * 0.9
+        ) {
+          section.classList.add('is-visible');
+          observer.unobserve(section);
+        }
+      });
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(revealPassed);
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    revealPassed();
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
   }, []);
 
   const handleExplorePrograms = () => {
@@ -97,6 +127,8 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#FAF7F2] dark:bg-slate-950 text-[#14120F] dark:text-[#F3F0E9] transition-colors font-sans selection:bg-gold-400/40">
       
+      <JourneyLoader />
+
       {offlineWarning && (
         <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-500 text-amber-950 px-4 py-2 text-center text-sm font-semibold shadow-md">
           Latest content is temporarily unavailable. Displaying previously cached information.
@@ -123,13 +155,13 @@ export default function App() {
         {/* 2. Quick Stats floating over the hero edge */}
         <QuickStats />
 
-        {/* 3. Rotating Announcement Banners */}
+        {/* 3. Admissions call to action (switches to next year's intake from November) */}
+        <AdmissionsStrip />
+
+        {/* 4. Rotating Announcement Banners */}
         <BannerSlider
           banners={banners}
         />
-
-        {/* 4. School values marquee */}
-        <ValuesMarquee />
 
         {/* 5. Single Compact School Videos Showcase */}
         <SchoolVideos videos={featuredVideos} />
