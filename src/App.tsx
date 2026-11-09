@@ -19,6 +19,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { Footer } from './components/Footer';
 import { JourneyLoader } from './components/JourneyLoader';
 import { INITIAL_FAQS, INITIAL_LINKS } from './data/initialData';
+import { LOCAL_GALLERY, LOCAL_HERO_SLIDES } from './data/localFallback';
 import { FAQItem, UsefulLink } from './types';
 import { useAppData } from './hooks/useAppData';
 
@@ -148,7 +149,7 @@ export default function App() {
       <main>
         {/* 1. Hero Section */}
         <Hero
-          slides={heroSlides}
+          slides={heroSlides.length > 0 ? heroSlides : LOCAL_HERO_SLIDES}
           onExplorePrograms={handleExplorePrograms}
         />
 
@@ -178,7 +179,7 @@ export default function App() {
         <WeatherLocation />
 
         {/* 9. Campus Photo Gallery */}
-        <GalleryGrid gallery={gallery} />
+        <GalleryGrid gallery={gallery.length > 0 ? gallery : LOCAL_GALLERY} />
 
         {/* 10. News & Career Vacancies Noticeboard */}
         <NewsJobsSection
